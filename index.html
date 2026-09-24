@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>__TITLE__｜yorozu-craft</title>
+  <meta name="description" content="__DESCRIPTION__">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/__REPO__/">
+
+  <meta property="og:title" content="__TITLE__｜yorozu-craft">
+  <meta property="og:description" content="__DESCRIPTION__">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yorozu-craft.com/__REPO__/">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:image" content="https://yorozu-craft.com/__REPO__/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#8b4513" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1814" media="(prefers-color-scheme: dark)">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "__TITLE__",
+    "description": "__DESCRIPTION__",
+    "url": "https://yorozu-craft.com/__REPO__/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "All",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+    "inLanguage": "ja"
+  }
+  </script>
+
+  <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト）。全画面で操作する画面なら script を消して meta だけ残す -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
+     crossorigin="anonymous"></script>
+
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <!-- PWA-BEGIN -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <!-- PWA-END -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>__TITLE__</h1>
+    <p class="subtitle">__DESCRIPTION__</p>
+  </header>
+
+  <main class="app-main">
+
+    <!-- ここにツール本体を書く（例: 金額を 100 円単位で切り上げる） -->
+    <section class="card" aria-labelledby="tool-heading">
+      <h2 id="tool-heading">計算</h2>
+      <div class="field">
+        <label for="amount">金額</label>
+        <p class="hint">入力内容はこの端末のブラウザにだけ保存され、外部には送信されません。</p>
+        <input type="number" id="amount" inputmode="numeric" placeholder="例：1234">
+      </div>
+      <p>結果：<strong id="result" aria-live="polite">—</strong></p>
+      <button type="button" id="share" class="btn">結果を開くリンクをコピー</button>
+    </section>
+
+    <p class="small"><a href="./guide.html">使い方・よくある質問・ご利用上の注意</a></p>
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="フッターナビゲーション">
+      <ul>
+        <li><a href="../">yorozu-craft トップ</a></li>
+        <li><a href="./" aria-current="page">__TITLE__</a></li>
+        <li><a href="./guide.html">使い方・よくある質問</a></li>
+        <li><a href="../about.html">運営者情報</a></li>
+        <li><a href="../privacy-policy.html">プライバシーポリシー</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <script src="./constants.js"></script>
+  <script src="./calc.js"></script>
+  <script src="./main.js"></script>
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

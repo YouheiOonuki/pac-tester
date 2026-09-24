@@ -1,0 +1,19 @@
+# テストの自動実行（yorozu-craft の README「ツールを追加するとき」）。push と PR のたびに node --test を走らせる
+name: test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tests/*.test.js

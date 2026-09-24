@@ -1,0 +1,62 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 環境変数
+.env
+.env.local
+.env.*.local
+
+# OS 生成ファイル
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# エディタ
+.vscode/
+.idea/
+*.suo
+*.user
+
+# ビルド成果物（将来的に Vite 等を使う場合）
+/dist/
+/build/
+
+# --- estate-audit 共通ベースライン（2026-08-02） ---
+# 秘密と再発ごみの共通除外。個別の事情がある行は、このブロックより上に
+# 書くこと（下に足すと、次回ベースラインを更新したとき紛れる）。
+#
+# .env* を丸ごと落としたうえで .env.example だけ戻す。テンプレートは
+# 追跡されるべきもので、これが無いと復元手順が repo から消える。
+.env
+.env.*
+!.env.example
+
+# 一括編集の退避コピー。*.bak は末尾一致なので .bak-<日付> を拾わない。
+# 2026-08-01 に ObsidianClaudeLog で実際に取りこぼしている。
+*.bak
+*.bak-*
+*.backup
+*.backup_*
+
+# 鍵・認証情報のファイル名。GCP の SA 鍵は「使わない」方針だが、
+# 方針は置いてしまった1回を防がない。
+secret.json
+secrets.json
+credentials.json
+service-account*.json
+*-sa.json
+id_rsa
+id_rsa.*
+.netrc
+.npmrc
+
+# 秘密の所在を書いた走査結果。本文より公開してはいけない。
+findings/
