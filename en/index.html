@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAC File Tester – test FindProxyForURL offline | yorozu-craft</title>
+  <meta name="description" content="Free, offline PAC file tester. Run FindProxyForURL against a list of URLs, see every return value in a table, catch syntax and logic mistakes, and diff an old and new proxy.pac. One HTML file; your PAC never leaves the browser.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/pac-tester/en/">
+  <link rel="alternate" hreflang="ja" href="https://yorozu-craft.com/pac-tester/">
+  <link rel="alternate" hreflang="en" href="https://yorozu-craft.com/pac-tester/en/">
+  <link rel="alternate" hreflang="x-default" href="https://yorozu-craft.com/pac-tester/">
+
+  <meta property="og:title" content="PAC File Tester – test FindProxyForURL offline">
+  <meta property="og:description" content="Run FindProxyForURL against a list of URLs, check a PAC file for common mistakes and diff two versions. One offline HTML file.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yorozu-craft.com/pac-tester/en/">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta property="og:image" content="https://yorozu-craft.com/pac-tester/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#8b4513" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1814" media="(prefers-color-scheme: dark)">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PAC File Tester",
+    "description": "Offline PAC file tester: run FindProxyForURL against a list of URLs, lint the PAC file and compare two versions. One HTML file with no network access.",
+    "url": "https://yorozu-craft.com/pac-tester/en/",
+    "applicationCategory": "DeveloperApplication",
+    "downloadUrl": "https://yorozu-craft.com/pac-tester/pac-tester.html",
+    "fileSize": "370KB",
+    "softwareRequirements": "A current browser such as Microsoft Edge, Google Chrome, Firefox or Safari",
+    "operatingSystem": "All",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+  }
+  </script>
+
+  <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト） -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
+     crossorigin="anonymous"></script>
+
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>PAC File Tester</h1>
+    <p class="subtitle">Test a proxy.pac against a list of URLs, with syntax checks and an old/new diff. Runs offline.</p>
+    <p class="lang-switch"><a href="../" hreflang="ja" lang="ja">日本語</a></p>
+  </header>
+
+  <main class="app-main">
+
+    <section class="card hero" aria-labelledby="h-get">
+      <h2 id="h-get">Download (free)</h2>
+      <p>The whole tool is <strong>one file, pac-tester.html</strong>. <strong>Nothing to install and no network access</strong>, so it works on locked-down work PCs and on machines with no internet connection.</p>
+      <div class="cta">
+        <a class="btn btn-big" href="../pac-tester.html" download="pac-tester.html">Download pac-tester.html (about 370 KB)</a>
+        <a class="btn btn-sub" href="../pac-tester.html" target="_blank" rel="noopener">Open in the browser</a>
+      </div>
+      <p class="small"><strong>The tool's screen is in Japanese.</strong> The <a href="#ui">key labels are below</a>.</p>
+    </section>
+
+    <section class="card content" aria-labelledby="h-feat">
+      <h2 id="h-feat">Test FindProxyForURL offline</h2>
+      <ul class="feature-list">
+        <li><strong>Many URLs at once</strong>: put one URL per line and get the return value for each (<code>DIRECT</code>, <code>PROXY host:port; …</code>) in a table</li>
+        <li><strong>All 14 standard helper functions</strong></li>
+        <li><strong>Diff mode</strong>: evaluate an old and a new PAC against the same URLs and highlight <strong>only the URLs whose result changed</strong></li>
+      </ul>
+      <details class="more">
+        <summary>More features</summary>
+        <ul class="feature-list">
+          <li>The host name is taken from each URL for you</li>
+          <li>You set the DNS answers (a host-to-IP table), the value of <code>myIpAddress()</code> and the date and time the script sees</li>
+          <li><strong>Colour-coded results</strong>: each distinct return value gets a colour and a count; click one to filter. <code>alert()</code> output, errors and timeouts show on the row they belong to. Export to CSV</li>
+          <li>The 14 helpers: <code>isInNet</code>, <code>shExpMatch</code>, <code>dnsDomainIs</code>, <code>weekdayRange</code>, <code>timeRange</code> and the rest (see the <a href="./guide.html#helpers">guide</a>)</li>
+          <li><strong>Infinite loops can't freeze it</strong>: each URL is cut off after 0.2 seconds</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card content" aria-labelledby="h-lint">
+      <h2 id="h-lint">PAC file debugger: what the checks find</h2>
+      <p>The checks parse the script (with acorn) without running it, and point to the line.</p>
+      <details class="more">
+        <summary>What the checks look for</summary>
+        <p>The checks are approximate and will not catch every mistake.</p>
+        <ul class="feature-list">
+        <li>No <code>FindProxyForURL</code>, a wrongly capitalised name, the wrong number of parameters, or two definitions</li>
+        <li>Full-width (CJK) spaces and punctuation, and zero-width spaces, pasted into code. An error in code, a warning inside strings, ignored in comments</li>
+        <li>Unbalanced <code>( ) { } [ ]</code> and unclosed quotes, with the line where they open and where they go wrong</li>
+        <li>Paths where the function can end without a <code>return</code>, and return values in the wrong format (<code>,</code> instead of <code>;</code>, <code>"PROXY"</code> with no host, a port out of range)</li>
+        <li><code>shExpMatch</code> patterns that can never match, such as <code>".example.com"</code> without <code>*</code>, a scheme in a host pattern, or a URL pattern missing its trailing <code>/</code></li>
+        <li><strong>Shadowed rules</strong>: an earlier <code>if (…) return …;</code> whose pattern already covers a later one, so the later rule is never reached</li>
+        <li>Suspicious helper calls: a non-contiguous <code>isInNet</code> mask, <code>dnsDomainIs</code> without the leading dot, lower-case <code>weekdayRange</code> days, <code>timeRange(22, 6)</code></li>
+      </ul>
+      </details>
+    </section>
+
+    <section class="card content" id="ui" aria-labelledby="h-steps">
+      <h2 id="h-steps">How to use it</h2>
+      <ol>
+        <li>Download pac-tester.html and double-click it</li>
+        <li>Paste your PAC into the left-hand box, or drag and drop a .pac file onto the page</li>
+        <li>List the URLs to test in the right-hand box, one per line. Results and check messages update as you type</li>
+      </ol>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Label on screen</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td lang="ja">PAC ファイル</td><td>PAC file (paste here)</td></tr>
+            <tr><td lang="ja">テストする URL</td><td>URLs to test</td></tr>
+            <tr><td lang="ja">結果</td><td>Results</td></tr>
+            <tr><td lang="ja">構文・ロジックのチェック</td><td>Syntax and logic checks</td></tr>
+            <tr><td lang="ja">評価の設定</td><td>Evaluation settings (click to expand)</td></tr>
+            <tr><td lang="ja">差分モード</td><td>Diff mode</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <details class="more">
+        <summary>Reading the Japanese screen (all labels)</summary>
+        <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Label on screen</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td lang="ja">評価する</td><td>Evaluate now (Ctrl+Enter). Normally not needed: it re-evaluates 400 ms after you stop typing</td></tr>
+            <tr><td lang="ja">差分モード</td><td>Diff mode</td></tr>
+            <tr><td lang="ja">見本</td><td>Load the sample PAC, URLs and settings</td></tr>
+            <tr><td lang="ja">ライセンス</td><td>About this tool and the bundled library's license</td></tr>
+            <tr><td lang="ja">PAC ファイル</td><td>PAC file (paste here)</td></tr>
+            <tr><td lang="ja">開く</td><td>Open a file</td></tr>
+            <tr><td lang="ja">旧 PAC（いまの版）／新 PAC（変更後）</td><td>Old PAC (current) / New PAC (changed), in diff mode</td></tr>
+            <tr><td lang="ja">旧を写す</td><td>Copy the old PAC into the new box</td></tr>
+            <tr><td lang="ja">PAC と URL 一覧も、このブラウザに保存する</td><td>Also save the PAC and URL list in this browser (off by default)</td></tr>
+            <tr><td lang="ja">構文・ロジックのチェック</td><td>Syntax and logic checks. Click a message to jump to its line</td></tr>
+            <tr><td lang="ja">エラー／注意／参考</td><td>Error / Warning / Info</td></tr>
+            <tr><td lang="ja">問題は見つかりませんでした</td><td>No problems found</td></tr>
+            <tr><td lang="ja">shExpMatch のパターン一覧</td><td>List of every shExpMatch pattern in the file</td></tr>
+            <tr><td lang="ja">テストする URL</td><td>URLs to test (one per line; lines starting with # are comments)</td></tr>
+            <tr><td lang="ja">.txt を開く／.txt で保存</td><td>Open / save the URL list as a .txt file</td></tr>
+            <tr><td lang="ja">評価の設定</td><td>Evaluation settings (click to expand)</td></tr>
+            <tr><td lang="ja">ホスト名と IP アドレスの対応表</td><td>Host-to-IP table, used instead of DNS</td></tr>
+            <tr><td lang="ja">myIpAddress() が返す IP アドレス</td><td>IP address returned by myIpAddress()</td></tr>
+            <tr><td lang="ja">評価に使う日時／いまの日時を使う</td><td>Date and time the script sees / use the current date and time</td></tr>
+            <tr><td lang="ja">UTC との時差</td><td>UTC offset</td></tr>
+            <tr><td lang="ja">https の URL は、パスとクエリを除いて渡す</td><td>Strip the path and query from https URLs (on by default, as Chrome and Edge do)</td></tr>
+            <tr><td lang="ja">結果</td><td>Results</td></tr>
+            <tr><td lang="ja">URL・結果で絞り込み</td><td>Filter by URL or result</td></tr>
+            <tr><td lang="ja">変わった行だけ／エラー・注意だけ</td><td>Changed rows only (diff mode) / Errors and warnings only</td></tr>
+            <tr><td lang="ja">CSV で保存</td><td>Save as CSV</td></tr>
+            <tr><td lang="ja">タイムアウト／エラー／変更</td><td>Timeout / Error / Changed</td></tr>
+            <tr><td lang="ja">undefined（戻り値なし）</td><td>undefined (the function returned nothing)</td></tr>
+            <tr><td lang="ja">PAC に渡す URL</td><td>The URL actually passed to FindProxyForURL (shown when the https path was stripped)</td></tr>
+          </tbody>
+        </table>
+      </div>
+        <p class="small">Check messages and CSV column headings are also in Japanese. Each message shows its line number and severity.</p>
+        <p class="small">On first launch it shows a sample PAC, URL list and host table that use only example domains (the sample's comments are in Japanese).</p>
+      </details>
+    </section>
+
+    <section class="card content" aria-labelledby="h-qa">
+      <h2 id="h-qa">Common questions this answers</h2>
+      <h3>How do I test a PAC file without deploying it?</h3>
+      <p>Paste it into the tester and list the URLs you care about. You don't need a web server or a proxy.</p>
+      <details class="more">
+        <summary>How the URL is passed</summary>
+        <p>The tester calls <code>FindProxyForURL(url, host)</code> for each one: <code>host</code> is the host name from the URL, in lower case and without the port. A line without a scheme is treated as <code>http://</code>.</p>
+      </details>
+
+      <h3>How do I debug FindProxyForURL?</h3>
+      <p>Put <code>alert("…")</code> calls in the script: their output appears on the result row for that URL. Script errors and timeouts also show per URL.</p>
+
+      <h3>Why does dnsResolve or isInNet behave differently here?</h3>
+      <p>A web page can't do DNS lookups, so the tester uses your host-to-IP table instead. A host that isn't in the table can't be resolved: <code>dnsResolve</code> returns <code>null</code> and <code>isResolvable</code> and <code>isInNet</code> return <code>false</code>.</p>
+      <details class="more">
+        <summary>IP addresses, localhost and IPv6</summary>
+        <p>An IP address in the URL is used as is, and <code>localhost</code> is 127.0.0.1 unless the table says otherwise. Only IPv4 is supported, and Microsoft's IPv6 extensions (<code>isInNetEx</code>, <code>dnsResolveEx</code> and so on) raise an error.</p>
+      </details>
+
+      <h3>What URL format do I use for a local .pac file?</h3>
+      <p>For this tester, none: open or drop the file. A local file URL looks like <code>file:///C:/proxy/proxy.pac</code> on Windows (<a href="https://www.rfc-editor.org/rfc/rfc8089.html#appendix-E.2" target="_blank" rel="noopener">RFC 8089, E.2</a>), but Windows' WinHTTP <a href="https://learn.microsoft.com/windows/win32/winhttp/winhttp-autoproxy-support" target="_blank" rel="noopener">supports only http: and https: PAC URLs</a>.</p>
+
+      <h3>Why does a path rule not match https URLs?</h3>
+      <p>Chrome and Edge pass only <code>https://host/</code> to the PAC for https URLs, without the path or query. The tester does the same by default.</p>
+    </section>
+
+    <section class="card content" aria-labelledby="h-safe">
+      <h2 id="h-safe">Your PAC stays on your machine and runs in a sandbox</h2>
+      <p>pac-tester.html <strong>never connects to any server</strong>. The PAC runs in a <strong>Worker inside a sandboxed iframe</strong>, separate from the page.</p>
+      <details class="more">
+        <summary>More on safety</summary>
+        <ul>
+          <li>Its Content-Security-Policy blocks network requests as well</li>
+          <li>pac-tester.html includes everything it needs, including the parser library (acorn). PAC files with internal host names are safe to paste</li>
+          <li>A PAC is a program, so it runs separately from the page. It can't touch the page, its storage, or the network</li>
+          <li>By default your PAC isn't saved in the browser either (you can opt in)</li>
+          <li>pac-tester.html contains no ads and no analytics (ads appear only on this page and the guide)</li>
+        </ul>
+      </details>
+    </section>
+
+    <p class="card" style="text-align:center"><a href="./guide.html">Guide: helper function reference, common mistakes, diff mode, FAQ</a></p>
+
+    <p class="card small">By the same author: query Active Directory without RSAT from PowerShell → <a href="../../ADSearch/en/">ADSearch</a></p>
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="Footer">
+      <ul>
+        <li><a href="../../">yorozu-craft (Japanese)</a></li>
+        <li><a href="./" aria-current="page">PAC File Tester</a></li>
+        <li><a href="./guide.html">Guide and FAQ</a></li>
+        <li><a href="../../en/about.html">About</a></li>
+        <li><a href="../../en/privacy-policy.html">Privacy policy</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

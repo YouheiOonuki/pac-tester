@@ -12,6 +12,7 @@ md-viewer と同じ形（オーナー決定）。**`pac-tester.html`（1 ファ�
 | ページ | 広告・解析 | 検索 |
 |-------|-----------|------|
 | `index.html`（紹介・ダウンロード） | AdSense・Cloudflare ビーコンあり | index |
+| `en/index.html`・`en/guide.html`（英語版） | AdSense・Cloudflare ビーコンあり | index |
 | `guide.html`（使い方） | AdSense・Cloudflare ビーコンあり | index |
 | `pac-tester.html`（本体） | **なし**（外部への通信を一切しない） | `noindex`、sitemap に載せない |
 
@@ -83,8 +84,8 @@ node --test tests/*.test.js
 | 時期 | 確認すること | 直す場所 |
 |------|------------|---------|
 | 半年に 1 回（3 月・9 月ごろ） | acorn の新しい版、`npm audit` | `package.json` のバージョン → `npm install` → `node build.mjs` → テスト → ブラウザで見本・チェック・差分・無限ループを確認 → `pac-tester.html`・`THIRD_PARTY_LICENSES.txt`・`package-lock.json` をコミット |
-| ライブラリを更新したとき | ファイルサイズ、ライセンス | `index.html` の「約 370KB」・JSON-LD の `fileSize`、`guide.html` の「ライセンス一覧」、この README |
-| ブラウザの PAC の扱いが変わったとき | https のパスの扱い・ヘルパー関数の差 | `src/pac-runtime.js`・`src/core.js`・`guide.html` |
+| ライブラリを更新したとき | ファイルサイズ、ライセンス | `index.html`・`en/index.html` の「約 370KB」・JSON-LD の `fileSize`、`guide.html`・`en/guide.html` の「ライセンス一覧」、この README |
+| ブラウザの PAC の扱いが変わったとき | https のパスの扱い・ヘルパー関数の差 | `src/pac-runtime.js`・`src/core.js`・`guide.html`・`en/guide.html` |
 
 直したら、`guide.html` の「更新履歴」に日付と内容を 1 行足す。
 
@@ -95,6 +96,7 @@ node --test tests/*.test.js
 | `pac-tester.html` | **本体**（ビルドで作る。ダウンロード版・「ブラウザで試す」の両方） |
 | `index.html` | 紹介・ダウンロードのページ |
 | `guide.html` | PAC の基本・使い方・ヘルパー関数の一覧と注意点・よくあるミス・差分モード・安全性・ライセンス一覧・よくある質問・ご利用上の注意・更新履歴 |
+| `en/index.html` / `en/guide.html` | 英語版の紹介・使い方（2026-09-24。K65）。本体 `pac-tester.html` の画面は日本語のままなので、紹介ページに画面の日本語ラベルと英語の意味の対応表を置いている。**本体のラベルを変えたら、この表も直す**。日本語版とは `hreflang` で相互に結ぶ（共通の決まりは youheioonuki.github.io の README「ツールを追加するとき」23） |
 | `src/app.html` | 本体の HTML のひな形（`{{…}}` を build.mjs が埋める） |
 | `src/app.css` | 本体の見た目（和紙風の配色、ダークモード対応） |
 | `src/app.js` | 本体の画面の制御・隔離用の枠の管理・結果の表・保存 |
@@ -108,7 +110,7 @@ node --test tests/*.test.js
 | `style.css` | 紹介・使い方ページの見た目 |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
 | `favicon.svg` / `apple-touch-icon.png` / `og-image.png` | アイコン / ホーム画面用アイコン / SNS 共有用画像（1200×630） |
-| `sitemap.xml` | サイトマップ（index.html と guide.html だけ） |
+| `sitemap.xml` | サイトマップ（index.html・guide.html と、その英語版 en/ の 2 ページ） |
 | `tests/runtime.test.js` | ヘルパー関数（shExpMatch・isInNet・dnsDomainIs・日時の関数など） |
 | `tests/sample.test.js` | 見本の PAC の期待値の表（Node の vm で評価）・無限ループのタイムアウト・見本が架空のドメインだけか |
 | `tests/lint.test.js` | チェック（全角スペース・return 漏れ・括弧・ルールの隠れ・パターン・戻り値の形） |
