@@ -62,46 +62,54 @@
 
     <section class="card hero" aria-labelledby="h-get">
       <h2 id="h-get">ダウンロードして使う（無料）</h2>
-      <p>本体は <strong>pac-tester.html という 1 つのファイル</strong>です。パソコンに保存して、ダブルクリックするとブラウザで開きます。<strong>インストール不要・通信しない</strong>ので、ソフトを入れられない職場の PC やネットにつながらない環境でも使えます。</p>
+      <p>本体は <strong>pac-tester.html という 1 つのファイル</strong>です。<strong>インストール不要・通信しない</strong>ので、ソフトを入れられない職場の PC やネットにつながらない環境でも使えます。</p>
       <div class="cta">
         <a class="btn btn-big" href="./pac-tester.html" download="pac-tester.html">ダウンロード（pac-tester.html・約 370KB）</a>
         <a class="btn btn-sub" href="./pac-tester.html" target="_blank" rel="noopener">ブラウザで試す</a>
       </div>
-      <p class="small">「ブラウザで試す」は、ダウンロードするものと同じファイルを開きます。広告やアクセス解析は入っていません（広告はこの紹介ページと使い方ページだけです）。</p>
+      <p class="small">「ブラウザで試す」は、ダウンロードするものと同じファイルを開きます。</p>
+      <details class="content">
+        <summary>使い方（3 ステップ）</summary>
+        <ol>
+          <li>上の「ダウンロード」で pac-tester.html を保存して、ダブルクリックで開く</li>
+          <li>左の欄に PAC を貼り付ける（.pac ファイルをドラッグ＆ドロップしても開けます）</li>
+          <li>右の欄にテストしたい URL を 1 行に 1 つ書く。入力するたびに自動で評価され、結果の表とチェックの結果が出ます</li>
+        </ol>
+        <p class="small">はじめて開くと、架空のドメインを使った見本の PAC と URL の一覧が出ます。</p>
+      </details>
     </section>
 
     <section class="card content" aria-labelledby="h-feat">
       <h2 id="h-feat">できること</h2>
-      <ul class="feature-list">
-        <li><strong>URL の一覧でまとめて評価</strong>：1 行に 1 つの URL を並べると、それぞれの戻り値（<code>DIRECT</code>・<code>PROXY host:port; …</code>）を表にします。ホスト名は URL から自動で取り出します</li>
-        <li><strong>戻り値ごとに色分け・絞り込み・CSV 保存</strong>：<code>alert()</code> の出力、エラー、タイムアウトも行ごとに出します</li>
-        <li><strong>標準のヘルパー関数</strong>：<code>isInNet</code>・<code>shExpMatch</code>・<code>dnsDomainIs</code>・<code>weekdayRange</code>・<code>timeRange</code> など 14 個。DNS の代わりに「ホスト名と IP アドレスの対応表」、<code>myIpAddress()</code> の値、評価に使う日時を自分で決められます</li>
-        <li><strong>構文・ロジックのチェック</strong>：全角スペースや全角記号の混入（コメントの中は除く）、括弧・引用符の対応、最後の <code>return</code> 漏れ、<code>shExpMatch</code> のパターンの誤り（<code>*</code> の付け忘れ、スキーム付きなど）、<strong>上のルールが下のルールを隠している</strong>ケースを見つけます</li>
-        <li><strong>差分モード</strong>：旧 PAC と新 PAC を同じ URL の一覧で評価し、<strong>結果が変わった URL だけ</strong>を強調します。更新のたびに「意図した変更だけが起きているか」を確かめられます</li>
-        <li><strong>無限ループでも固まらない</strong>：1 つの URL につき 0.2 秒で打ち切ります</li>
-      </ul>
-    </section>
-
-    <section class="card content" aria-labelledby="h-steps">
-      <h2 id="h-steps">使い方（3 ステップ）</h2>
-      <ol>
-        <li>上の「ダウンロード」で pac-tester.html を保存して、ダブルクリックで開く</li>
-        <li>左の欄に PAC を貼り付ける（.pac ファイルをドラッグ＆ドロップしても開けます）</li>
-        <li>右の欄にテストしたい URL を 1 行に 1 つ書く。入力するたびに自動で評価され、結果の表とチェックの結果が出ます</li>
-      </ol>
-      <p class="small">はじめて開くと、架空のドメインを使った見本の PAC と URL の一覧が出ます。</p>
+      <p>URL の一覧でまとめて評価、標準のヘルパー関数（isInNet・shExpMatch など 14 個）、構文・ロジックのチェック、差分モード。</p>
+      <details>
+        <summary>くわしく</summary>
+        <ul class="feature-list">
+          <li><strong>URL の一覧でまとめて評価</strong>：1 行に 1 つの URL を並べると、それぞれの戻り値（<code>DIRECT</code>・<code>PROXY host:port; …</code>）を表にします。ホスト名は URL から自動で取り出します</li>
+          <li><strong>戻り値ごとに色分け・絞り込み・CSV 保存</strong>：<code>alert()</code> の出力、エラー、タイムアウトも行ごとに出します</li>
+          <li><strong>標準のヘルパー関数</strong>：<code>isInNet</code>・<code>shExpMatch</code>・<code>dnsDomainIs</code>・<code>weekdayRange</code>・<code>timeRange</code> など 14 個。DNS の代わりに「ホスト名と IP アドレスの対応表」、<code>myIpAddress()</code> の値、評価に使う日時を自分で決められます</li>
+          <li><strong>構文・ロジックのチェック</strong>：全角スペースや全角記号の混入（コメントの中は除く）、括弧・引用符の対応、最後の <code>return</code> 漏れ、<code>shExpMatch</code> のパターンの誤り（<code>*</code> の付け忘れ、スキーム付きなど）、<strong>上のルールが下のルールを隠している</strong>ケースを見つけます</li>
+          <li><strong>差分モード</strong>：旧 PAC と新 PAC を同じ URL の一覧で評価し、<strong>結果が変わった URL だけ</strong>を強調します。更新のたびに「意図した変更だけが起きているか」を確かめられます</li>
+          <li><strong>無限ループでも固まらない</strong>：1 つの URL につき 0.2 秒で打ち切ります</li>
+        </ul>
+      </details>
     </section>
 
     <section class="card content" aria-labelledby="h-safe">
       <h2 id="h-safe">貼った PAC は外に出ない・隔離して実行する</h2>
-      <ul>
-        <li>pac-tester.html は、構文を調べるライブラリ（acorn）も含めて 1 ファイルの中に入っています。<strong>外部のサーバーには一切接続しません</strong>（ブラウザの仕組み Content-Security-Policy でも通信を禁止しています）。社内のホスト名が入った PAC でも、どこにも送られません</li>
-        <li>PAC は JavaScript のプログラムなので、<strong>ページとは別の、隔離した枠（sandbox の iframe）の中の Worker</strong> で実行します。PAC のコードからは、このページの画面や保存領域には触れられず、通信もできません</li>
-        <li>貼った PAC は、既定ではブラウザにも保存しません（保存するかどうかは自分で選べます）</li>
-      </ul>
+      <p><strong>外部のサーバーには一切接続しません</strong>。PAC は隔離した枠（sandbox の iframe）の中の Worker で実行します。</p>
+      <details>
+        <summary>くわしく</summary>
+        <ul>
+          <li>pac-tester.html は、構文を調べるライブラリ（acorn）も含めて 1 ファイルの中に入っています。<strong>外部のサーバーには一切接続しません</strong>（ブラウザの仕組み Content-Security-Policy でも通信を禁止しています）。社内のホスト名が入った PAC でも、どこにも送られません</li>
+          <li>PAC は JavaScript のプログラムなので、<strong>ページとは別の、隔離した枠（sandbox の iframe）の中の Worker</strong> で実行します。PAC のコードからは、このページの画面や保存領域には触れられず、通信もできません</li>
+          <li>貼った PAC は、既定ではブラウザにも保存しません（保存するかどうかは自分で選べます）</li>
+          <li>pac-tester.html には広告やアクセス解析は入っていません（広告はこの紹介ページと使い方ページだけです）</li>
+        </ul>
+      </details>
     </section>
 
-    <p class="card" style="text-align:center"><a href="./guide.html">使い方・ヘルパー関数の一覧・よくあるミス・差分モード・よくある質問・ライセンス</a></p>
+    <p class="card" style="text-align:center"><a href="./guide.html">使い方・ヘルパー関数の一覧・よくある質問</a></p>
 
     <p class="card small">同じ作者の、RSAT なしで Active Directory を調べる PowerShell ライブラリ → <a href="../ADSearch/">ADSearch</a></p>
 
