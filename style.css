@@ -156,3 +156,12 @@ a { color: var(--accent); }
 .content summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; }
 .content details[open] summary { margin-bottom: 0.3rem; }
 .content h4 { font-size: 0.9rem; margin: 0.8rem 0 0.2rem; }
+
+/* 日英の切り替え（ヘッダーの下。英語版は /en/。README「ツールを追加するとき」23） */
+.lang-switch { font-size: 0.82rem; margin-top: 0.35rem; }
+
+/* 英語ページの折りたたみ（WRITING.md 5 章: 補足・一覧は <details> に入れる） */
+.more { margin-top: 0.7rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; }
+.more summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; font-weight: 600; }
+.more[open] summary { margin-bottom: 0.4rem; }
+.more > * + * { margin-top: 0.4rem; }

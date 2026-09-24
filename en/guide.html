@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAC File Tester Guide: helper functions and common mistakes | yorozu-craft</title>
+  <meta name="description" content="How to use the offline PAC File Tester, with a reference for the PAC helper functions (isInNet, shExpMatch, dnsDomainIs, dateRange, timeRange…) and their pitfalls, common proxy.pac mistakes, diff mode and FAQ.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/pac-tester/en/guide.html">
+  <link rel="alternate" hreflang="ja" href="https://yorozu-craft.com/pac-tester/guide.html">
+  <link rel="alternate" hreflang="en" href="https://yorozu-craft.com/pac-tester/en/guide.html">
+  <link rel="alternate" hreflang="x-default" href="https://yorozu-craft.com/pac-tester/guide.html">
+
+  <meta property="og:title" content="PAC File Tester Guide: helper functions and common mistakes">
+  <meta property="og:description" content="PAC helper function reference and pitfalls, common proxy.pac mistakes, diff mode and FAQ.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://yorozu-craft.com/pac-tester/en/guide.html">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta property="og:image" content="https://yorozu-craft.com/pac-tester/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- FAQ（下の #faq と内容をそろえる） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can the results differ from a real browser?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The tester does no DNS lookups: only hosts in the host-to-IP table resolve. Browsers and operating systems also differ slightly in how they run PAC files. Do the final check in the browser and OS you use."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do isInNet and dnsResolve find IP addresses?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A web page cannot query DNS, so they use the host-to-IP table in the evaluation settings. Hosts not in the table cannot be resolved: dnsResolve returns null, and isResolvable and isInNet return false."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are isInNetEx and the other Microsoft extensions, or IPv6, supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Calling isResolvableEx, dnsResolveEx, myIpAddressEx, isInNetEx, sortIpAddressList or the other extension functions raises an error. The host table and myIpAddress handle IPv4 addresses only."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト） -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
+     crossorigin="anonymous"></script>
+
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>PAC File Tester guide</h1>
+    <p class="subtitle">PAC basics, helper function reference, common mistakes, diff mode, safety and FAQ</p>
+    <p class="lang-switch"><a href="../guide.html" hreflang="ja" lang="ja">日本語</a></p>
+  </header>
+
+  <main class="app-main">
+
+    <p class="card" style="text-align:center"><a href="./">▶ Download PAC File Tester</a></p>
+
+
+    <article class="card content" id="basics">
+      <h2>PAC basics</h2>
+      <p>A PAC (Proxy Auto-Configuration) file is a JavaScript file that browsers and operating systems use to decide which proxy to use for a URL. It defines one function, <code>FindProxyForURL(url, host)</code>.</p>
+      <details class="more">
+        <summary>Example and return values</summary>
+        <p>It is often named <code>proxy.pac</code> or <code>wpad.dat</code>. The browser calls the function for every URL it opens and connects as the returned string says.</p>
+      <pre>function FindProxyForURL(url, host) {
+  if (isPlainHostName(host)) return "DIRECT";
+  if (dnsDomainIs(host, ".example.com")) return "DIRECT";
+  return "PROXY proxy.example.net:8080; DIRECT";
+}</pre>
+      <ul>
+        <li><code>url</code> is the full URL (for example <code>http://www.example.com/a/b</code>); <code>host</code> is just the host name (<code>www.example.com</code>, lower case, without the port)</li>
+        <li>The return value is <code>"DIRECT"</code> (no proxy) or <code>"PROXY host:port"</code>. Separate several with <code>;</code> and the next one is used when the previous one is unavailable</li>
+        <li>Some browsers also accept <code>SOCKS host:port</code>, <code>HTTPS host:port</code> and others</li>
+      </ul>
+      </details>
+    </article>
+
+    <article class="card content" id="howto">
+      <h2>How to use</h2>
+      <ol>
+        <li>Download <code>pac-tester.html</code> from the <a href="./">download page</a> and double-click it</li>
+        <li>Paste your PAC into the <span lang="ja">PAC ファイル</span> (PAC file) box on the left</li>
+        <li>In <span lang="ja">テストする URL</span> (URLs to test) on the right, write one URL per line</li>
+        <li>It evaluates as you type. The <span lang="ja">結果</span> (Results) table shows the return value for each URL</li>
+      </ol>
+      <details class="more">
+        <summary>More on the screen and the evaluation settings</summary>
+        <p>The tool's screen is in Japanese. The <a href="./#ui">label table on the download page</a> gives the English meaning of each label.</p>
+        <ul>
+          <li>Choose a .pac file with <span lang="ja">開く</span> (Open) or drag and drop it onto the page</li>
+          <li>Without <code>http://</code> a URL line is treated as http. Lines starting with <code>#</code> are comments. The list loads from and saves to a .txt file</li>
+          <li>Ctrl+Enter or <span lang="ja">評価する</span> evaluates at once</li>
+          <li>The coloured buttons above the results are the counts for each return value; click one to show only those rows. Filter by text, show only errors and warnings, or save as CSV</li>
+          <li>Problems found in the script are listed under <span lang="ja">構文・ロジックのチェック</span> (Syntax and logic checks). Click one to jump to the line</li>
+        </ul>
+        <p><strong>Evaluation settings</strong></p>
+      <ul>
+        <li><strong>Host-to-IP table</strong>: replaces DNS for <code>dnsResolve</code>, <code>isInNet</code> and <code>isResolvable</code>. One entry per line, as "host IP" or in hosts-file order "IP host". <code>*.example.com 10.0.0.1</code> applies to every host under that domain</li>
+        <li><strong>IP address returned by myIpAddress()</strong>: test a PAC that picks a proxy per site by entering that site's client address</li>
+        <li><strong>Date and time</strong>: the date, time and UTC offset used by <code>weekdayRange</code>, <code>dateRange</code> and <code>timeRange</code>. Untick "use the current date and time" to test any moment you like</li>
+        <li><strong>Strip the path and query from https URLs</strong>: matches Chrome and Edge (on by default)</li>
+      </ul>
+      </details>
+      <h3 id="diff">Diff mode</h3>
+      <p>Use diff mode when you change a PAC, to confirm that only the URLs you meant to change get a different result.</p>
+      <details class="more">
+        <summary>How diff mode works</summary>
+      <ol>
+        <li>Press <span lang="ja">差分モード</span> (Diff mode). The PAC box splits into <span lang="ja">旧 PAC（いまの版）</span> (old, current) and <span lang="ja">新 PAC（変更後）</span> (new, changed). The new box starts with a copy of the old one</li>
+        <li>Put the PAC in use now in the old box and the changed PAC in the new box (Open and drag and drop work for each)</li>
+        <li>Both are evaluated against the same URLs. <strong>Only rows whose result changed</strong> are coloured and marked <span lang="ja">変更</span> (Changed). The number of changes appears above the results, and <span lang="ja">変わった行だけ</span> shows only the changed rows</li>
+      </ol>
+      <p>Differences in whitespace around <code>;</code> in the return value don't count as changes. Errors and timeouts do. The CSV includes both old and new results.</p>
+      </details>
+    </article>
+
+    <article class="card content" id="helpers">
+      <h2>Helper functions and their pitfalls</h2>
+      <p>The tester provides the 14 standard functions available inside a PAC file.</p>
+      <details class="more">
+        <summary>All 14 functions and their pitfalls</summary>
+        <p>Their behaviour follows the Firefox and Chromium implementations (both descend from Netscape's original code).</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Function</th><th>What it does</th><th>Pitfalls</th></tr></thead>
+          <tbody>
+            <tr><td><code>isPlainHostName(host)</code></td><td>True if the host name has no dot (e.g. <code>intranet</code>)</td><td>False for IPv6 addresses (containing <code>:</code>)</td></tr>
+            <tr><td><code>dnsDomainIs(host, domain)</code></td><td>True if <code>host</code> ends with <code>domain</code></td><td>Case-sensitive. Without the leading dot, <code>"example.com"</code> also matches <code>badexample.com</code></td></tr>
+            <tr><td><code>localHostOrDomainIs(host, hostdom)</code></td><td>True if they are identical, or if a host with no domain matches the start of <code>hostdom</code></td><td><code>localHostOrDomainIs("www", "www.example.com")</code> is true</td></tr>
+            <tr><td><code>isResolvable(host)</code></td><td>True if the host resolves to an IP address</td><td>False for hosts not in the host-to-IP table</td></tr>
+            <tr><td><code>isInNet(host, pattern, mask)</code></td><td>True if the IP address is in that network</td><td>A host name is resolved through the table first. The mask must be dotted (<code>"255.255.0.0"</code>); <code>/16</code> does not work</td></tr>
+            <tr><td><code>dnsResolve(host)</code></td><td>Returns the IP address</td><td><code>null</code> if it can't be resolved</td></tr>
+            <tr><td><code>convert_addr(ip)</code></td><td>Converts an IP address to a 32-bit integer</td><td>Signed, as in browsers (<code>192.168.0.1</code> is negative)</td></tr>
+            <tr><td><code>myIpAddress()</code></td><td>The client's own IP address</td><td>Returns the value from the settings</td></tr>
+            <tr><td><code>dnsDomainLevels(host)</code></td><td>The number of dots</td><td><code>www.example.com</code> gives 2</td></tr>
+            <tr><td><code>shExpMatch(str, pattern)</code></td><td>Wildcard match</td><td><code>*</code> is zero or more characters, <code>?</code> exactly one. True only if the <strong>whole</strong> string matches. Case-sensitive. Other characters are literal here, but some browsers treat <code>[ ]</code> or <code>+</code> as regular expression syntax, so avoid them</td></tr>
+            <tr><td><code>weekdayRange(wd1, wd2, "GMT")</code></td><td>Day-of-week range</td><td>Three upper-case English letters such as <code>"MON"</code>. Can wrap around the week (<code>"FRI", "MON"</code>). A final <code>"GMT"</code> uses the UTC day</td></tr>
+            <tr><td><code>dateRange(…)</code></td><td>Range of days, months and years</td><td>If the range ends with a month only, it runs to the last day of that month (browser implementations can be a few days off in months with fewer than 31 days)</td></tr>
+            <tr><td><code>timeRange(…)</code></td><td>Time-of-day range</td><td><code>timeRange(9, 17)</code> means 9:00 to 17:59. Hours-only ranges do not wrap past midnight (<code>timeRange(22, 6)</code> is always false); <code>timeRange(22, 0, 6, 0)</code> does</td></tr>
+            <tr><td><code>alert(message)</code></td><td>Outputs a message</td><td>Shown on that URL's row in the results</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>You can't use <code>eval</code> or <code>new Function</code> inside the PAC (blocked for safety). Calling <code>new Date()</code> directly gives your computer's clock, not the date and time in the settings.</p>
+      </details>
+    </article>
+
+    <article class="card content" id="mistakes">
+      <h2>Common mistakes (what the checks find)</h2>
+      <p>Full-width spaces, unbalanced brackets, a missing final <code>return</code>, broken <code>shExpMatch</code> patterns, shadowed rules and malformed return values. The checks are approximate; read them together with the results table.</p>
+      <details class="more">
+        <summary>Each mistake, with examples</summary>
+      <ul>
+        <li><strong>Full-width spaces and punctuation</strong>: after typing comments in Japanese, Chinese or Korean, a full-width space or bracket can slip into the code. JavaScript accepts a full-width space as whitespace, so browsers won't complain. Inside comments these are fine, inside strings they are a warning, in code they are an error</li>
+        <li><strong>Unbalanced brackets and quotes</strong>: mismatched <code>{ }</code>, <code>( )</code>, <code>[ ]</code> and unclosed quotes, with line numbers. Parser errors are also reported</li>
+        <li><strong>Missing final return</strong>: a URL that matches none of the <code>if</code> statements reaches the end of the function. The result is <code>undefined</code>, which browsers handle differently. End with <code>return "DIRECT";</code> or similar</li>
+        <li><strong>Broken shExpMatch patterns</strong>: <code>shExpMatch(host, ".example.com")</code> (missing <code>*</code>, matches nothing), <code>shExpMatch(host, "http://…")</code> (host has no scheme), <code>shExpMatch(url, "http://www.example.com")</code> (missing the trailing <code>/</code> of the URL), patterns with capital letters and so on. All patterns are also listed</li>
+        <li><strong>Shadowed rules</strong>: if <code>shExpMatch(host, "*.example.com")</code> returns first, a later <code>shExpMatch(host, "www.example.com")</code> can never be reached. For simple sequences of <code>if (shExpMatch(…)) return …;</code> (including <code>||</code>, <code>dnsDomainIs</code> and <code>host == "…"</code>), the checks report when an earlier pattern covers all of a later one. Same return value: info; different: warning</li>
+        <li><strong>Malformed return values</strong>: <code>"PROXY proxy.example.net:8080, DIRECT"</code> (the separator is <code>;</code>), a bare <code>"PROXY"</code>, a port out of range</li>
+        <li><strong>Helper misuse</strong>: the <code>isInNet</code> mask format, <code>weekdayRange("mon")</code> (lower case), <code>timeRange(22, 6)</code> and so on</li>
+      </ul>
+      </details>
+    </article>
+
+    <article class="card content" id="faq">
+      <h2>FAQ</h2>
+      <dl class="faq">
+        <dt>Can the results differ from a real browser?</dt>
+        <dd>Yes. The tester does no DNS lookups: only hosts in the host-to-IP table resolve. Browsers and operating systems also differ slightly in how they run PAC files. Do the final check in the browser and OS you use.</dd>
+        <dt>How do isInNet and dnsResolve find IP addresses?</dt>
+        <dd>A web page cannot query DNS, so they use the host-to-IP table in the evaluation settings. Hosts not in the table cannot be resolved: dnsResolve returns null, and isResolvable and isInNet return false.</dd>
+        <dt>Are isInNetEx and the other Microsoft extensions, or IPv6, supported?</dt>
+        <dd>No. Calling isResolvableEx, dnsResolveEx, myIpAddressEx, isInNetEx, sortIpAddressList or the other extension functions raises an error. The host table and myIpAddress handle IPv4 addresses only.</dd>
+      </dl>
+    </article>
+
+    <!-- README「ツールを追加するとき」8: ツール固有の注意・データの扱いはここに書く -->
+    <article class="card content" id="notes">
+      <h2>Notes and data handling</h2>
+      <ul>
+        <li><strong>What is saved</strong>: the evaluation settings are saved in your browser (localStorage key <code>pac-tester_settings</code>). The PAC and test URLs are saved in <code>pac-tester_draft</code> only while the save option is ticked, and are deleted when you untick it. Nothing is sent anywhere</li>
+        <li><strong>Files</strong>: PAC files and URL lists you open are read inside the browser and not sent anywhere. CSV and URL lists are saved as downloads</li>
+      </ul>
+      <details class="more" id="safety">
+        <summary>Safety, licenses and the sample</summary>
+      <ul>
+        <li><strong>No network access</strong>: everything, including the parser library (acorn), is in one file, and it never connects to a server. The page's Content-Security-Policy (<code>connect-src 'none'</code> and more) also blocks loading from and sending to other sites</li>
+        <li><strong>Sandboxed execution</strong>: a PAC is a program, and one you received from someone else could contain harmful code. So the PAC doesn't run in the page. It runs in a Worker started inside an iframe with the <code>sandbox</code> attribute (a different origin from the page). It can't reach the page, its storage (localStorage and so on) or other tools on this site. The same network restrictions apply to the iframe and the Worker, so the PAC can't send data out</li>
+        <li><strong>Stoppable</strong>: if one URL takes longer than 0.2 seconds, the Worker is terminated and recreated. An infinite loop won't freeze the page</li>
+        <li><strong>Not saved by default</strong>: the PAC and test URLs are saved in the browser only if you tick the option to save them</li>
+        <li><strong>No ads or analytics</strong> in pac-tester.html (ads appear only on this guide and the download page)</li>
+      </ul>
+        <div id="licenses"><p>The tool's code is under the MIT License (<a href="https://github.com/YouheiOonuki/pac-tester" target="_blank" rel="noopener">GitHub</a>). pac-tester.html embeds this library unchanged:</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Library</th><th>Version</th><th>License</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td>acorn</td><td>8.18.0</td><td>MIT</td><td>Parsing the PAC for the checks (it builds a syntax tree only; it doesn't run the PAC)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The full license text is in <a href="../THIRD_PARTY_LICENSES.txt">THIRD_PARTY_LICENSES.txt</a> and behind the <span lang="ja">ライセンス</span> button in pac-tester.html.</p></div>
+        <p><strong>Sample</strong>: the sample PAC is a generic example that uses only example domains (example.com, example.net, example.org, .example) and private or documentation IP addresses.</p>
+      </details>
+      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=pac-tester" target="_blank" rel="noopener">Feedback and bug reports (Google Forms)</a>: the form is in Japanese, but you can write in English.</p>
+      <p>The site-wide <a href="../../en/about.html">about page and disclaimer</a> and <a href="../../en/privacy-policy.html">privacy policy</a> apply to all tools. The change log is in the <a href="../guide.html#changelog" hreflang="ja">Japanese guide</a>.</p>
+    </article>
+
+    <section class="card content" aria-label="Other tools">
+      <p>Query Active Directory without RSAT from PowerShell, by the same author → <a href="../../ADSearch/en/">ADSearch</a></p>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="Footer">
+      <ul>
+        <li><a href="../../">yorozu-craft (Japanese)</a></li>
+        <li><a href="./">PAC File Tester</a></li>
+        <li><a href="./guide.html" aria-current="page">Guide and FAQ</a></li>
+        <li><a href="../../en/about.html">About</a></li>
+        <li><a href="../../en/privacy-policy.html">Privacy policy</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
