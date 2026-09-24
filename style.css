@@ -150,3 +150,9 @@ a { color: var(--accent); }
 .tbl { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
 .tbl th, .tbl td { border-bottom: 1px solid var(--border); padding: 0.35rem 0.45rem; text-align: left; vertical-align: top; }
 .tbl thead th { color: var(--muted); }
+
+/* 折りたたみ（使い方ページ・紹介ページ。WRITING.md の基準で、補足・一覧はここに入れる） */
+.content details { margin: 0.4rem 0; }
+.content summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; }
+.content details[open] summary { margin-bottom: 0.3rem; }
+.content h4 { font-size: 0.9rem; margin: 0.8rem 0 0.2rem; }
