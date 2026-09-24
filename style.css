@@ -150,3 +150,6 @@ a { color: var(--accent); }
 .tbl { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
 .tbl th, .tbl td { border-bottom: 1px solid var(--border); padding: 0.35rem 0.45rem; text-align: left; vertical-align: top; }
 .tbl thead th { color: var(--muted); }
+
+/* 日英の切り替え（ヘッダーの下。英語版は /en/。README「ツールを追加するとき」23） */
+.lang-switch { font-size: 0.82rem; margin-top: 0.35rem; }
