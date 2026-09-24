@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<!-- PAC を評価するための隔離用の枠（iframe sandbox="allow-scripts" の srcdoc。オリジンは null）。
+     通信・画像・フォームはすべて禁止。Worker は、この枠で作った Blob からだけ起動できる -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; form-action 'none'; base-uri 'none'">
+<title>PAC 評価用の枠</title>
+</head>
+<body>
+<script>
+// ===========================
+// PAC ファイル テスター — 隔離用の枠の中の制御（ページ本体とは postMessage だけでやりとりする）
+// 1. 本体から { type: 'run', pacs, urls, cfg } を受け取る
+// 2. PAC ごとに Worker を起動し（pac-runtime.js・worker.js・PAC をつなげた Blob）、URL を 1 件ずつ評価させる
+// 3. 1 件が timeoutMs を超えたら Worker を止めて（terminate）作り直し、次の URL へ進む
+// ===========================
+(function () {
+  'use strict';
+  var RUNTIME_SRC = {{RUNTIME_JSON}};
+  var WORKER_SRC = {{WORKER_JSON}};
+  var parentWin = window.parent;
+
+  var job = null;
+  var worker = null;
+  var blobUrl = null;
+  var timer = null;
+  var seq = 0;
+
+  function send(m) { parentWin.postMessage(m, '*'); }
+
+  function stopWorker() {
+    clearTimeout(timer);
+    if (worker) { worker.onmessage = null; worker.onerror = null; worker.terminate(); worker = null; }
+    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+  }
+
+  function lineCount(s) { return s.split('\n').length - 1; }
+
+  // PAC を読み込んだ Worker を起動する。PAC の関数の外のコードもここで実行される
+  function boot(j, pac, onReady, onFail) {
+    stopWorker();
+    var head = RUNTIME_SRC + '\nvar __PT_CFG = ' + JSON.stringify(j.cfg) + ';\n' + WORKER_SRC + '\n';
+    var offset = lineCount(head);
+    var src = head + pac.code + '\n;self.postMessage({ type: "ready" });\n';
+    blobUrl = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+    var w;
+    try {
+      w = new Worker(blobUrl);
+    } catch (e) {
+      onFail('評価用の Worker を起動できませんでした（' + (e && e.message) + '）');
+      return;
+    }
+    worker = w;
+    var settled = false;
+    timer = setTimeout(function () {
+      if (settled || w !== worker) return;
+      settled = true;
+      stopWorker();
+      onFail('PAC の読み込み（関数の外のコード）が ' + j.loadTimeoutMs + ' ミリ秒を超えたので止めました');
+    }, j.loadTimeoutMs);
+    w.onmessage = function (ev) {
+      if (w !== worker) return;
+      var m = ev.data || {};
+      if (!settled && m.type === 'ready') {
+        settled = true;
+        clearTimeout(timer);
+        onReady();
+      } else if (settled && m.type === 'result') {
+        onResult(m);
+      }
+    };
+    w.onerror = function (ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (w !== worker || settled) return;
+      settled = true;
+      stopWorker();
+      var line = ev && ev.lineno ? ev.lineno - offset : 0;
+      onFail('PAC を読み込めませんでした' + (line > 0 ? '（' + line + ' 行目）' : '') + '：' + ((ev && ev.message) || '構文エラー'));
+    };
+  }
+
+  var pending = null;   // 評価中の 1 件 { id, index }
+
+  function runPac() {
+    var j = job;
+    if (!j) return;
+    if (j.pi >= j.pacs.length) {
+      send({ type: 'done', jobId: j.id });
+      job = null;
+      stopWorker();
+      return;
+    }
+    var pac = j.pacs[j.pi];
+    j.ui = 0;
+    boot(j, pac, function () { nextUrl(); }, function (msg) {
+      if (job !== j) return;
+      send({ type: 'load-error', jobId: j.id, key: pac.key, message: msg });
+      j.pi++;
+      runPac();
+    });
+  }
+
+  function nextUrl() {
+    var j = job;
+    if (!j) return;
+    if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }
+    var u = j.urls[j.ui];
+    var id = ++seq;
+    pending = { id: id, index: j.ui, t0: Date.now() };
+    worker.postMessage({ type: 'eval', id: id, url: u.url, host: u.host });
+    timer = setTimeout(function () { onTimeout(j, id); }, j.timeoutMs);
+  }
+
+  function onResult(m) {
+    var j = job;
+    if (!j || !pending || m.id !== pending.id) return;
+    clearTimeout(timer);
+    var p = pending;
+    pending = null;
+    send({
+      type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index,
+      ok: !!m.ok, value: m.value, valueType: m.valueType, error: m.error, alerts: m.alerts || [], ms: m.ms
+    });
+    j.ui++;
+    nextUrl();
+  }
+
+  function onTimeout(j, id) {
+    if (job !== j || !pending || pending.id !== id) return;
+    var p = pending;
+    pending = null;
+    stopWorker();                           // 無限ループしている Worker をここで止める
+    send({ type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index, ok: false, timeout: true,
+      error: j.timeoutMs + ' ミリ秒を超えたので止めました（無限ループや重い処理がないか確かめてください）', alerts: [], ms: Date.now() - p.t0 });
+    j.ui++;
+    if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }
+    var pac = j.pacs[j.pi];
+    boot(j, pac, function () { nextUrl(); }, function (msg) {
+      if (job !== j) return;
+      send({ type: 'load-error', jobId: j.id, key: pac.key, message: msg, fromIndex: j.ui });
+      j.pi++;
+      runPac();
+    });
+  }
+
+  window.addEventListener('message', function (e) {
+    if (e.source !== parentWin) return;
+    var d = e.data || {};
+    if (d.type === 'run') {
+      stopWorker();
+      pending = null;
+      job = {
+        id: d.jobId, pacs: d.pacs || [], urls: d.urls || [], cfg: d.cfg || {},
+        timeoutMs: d.timeoutMs || 200, loadTimeoutMs: d.loadTimeoutMs || 1000, pi: 0, ui: 0
+      };
+      runPac();
+    } else if (d.type === 'cancel') {
+      stopWorker();
+      pending = null;
+      job = null;
+    }
+  });
+
+  send({ type: 'hello' });
+})();
+</script>
+</body>
+</html>

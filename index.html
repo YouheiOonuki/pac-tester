@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>__TITLE__｜yorozu-craft</title>
-  <meta name="description" content="__DESCRIPTION__">
+  <title>PAC ファイル テスター｜yorozu-craft</title>
+  <meta name="description" content="PAC ファイル（proxy.pac）の FindProxyForURL を、URL の一覧でまとめてテスト。戻り値の一覧表、構文チェック（全角スペース・括弧・return 漏れ・ルールの隠れ）、新旧の差分比較。通信しない 1 ファイルの HTML で、PAC の中身は外に出ません。">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://yorozu-craft.com/__REPO__/">
+  <link rel="canonical" href="https://yorozu-craft.com/pac-tester/">
 
-  <meta property="og:title" content="__TITLE__｜yorozu-craft">
-  <meta property="og:description" content="__DESCRIPTION__">
+  <meta property="og:title" content="PAC ファイル テスター｜yorozu-craft">
+  <meta property="og:description" content="PAC ファイル（proxy.pac）の FindProxyForURL を、URL の一覧でまとめてテスト。戻り値の一覧表、構文チェック（全角スペース・括弧・return 漏れ・ルールの隠れ）、新旧の差分比較。通信しない 1 ファイルの HTML で、PAC の中身は外に出ません。">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yorozu-craft.com/__REPO__/">
+  <meta property="og:url" content="https://yorozu-craft.com/pac-tester/">
   <meta property="og:site_name" content="yorozu-craft">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:image" content="https://yorozu-craft.com/__REPO__/og-image.png">
+  <meta property="og:image" content="https://yorozu-craft.com/pac-tester/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -25,10 +25,13 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "__TITLE__",
-    "description": "__DESCRIPTION__",
-    "url": "https://yorozu-craft.com/__REPO__/",
-    "applicationCategory": "UtilitiesApplication",
+    "name": "PAC ファイル テスター",
+    "description": "PAC ファイル（proxy.pac）の FindProxyForURL を、URL の一覧でまとめてテスト。戻り値の一覧表、構文チェック（全角スペース・括弧・return 漏れ・ルールの隠れ）、新旧の差分比較。通信しない 1 ファイルの HTML で、PAC の中身は外に出ません。",
+    "url": "https://yorozu-craft.com/pac-tester/",
+    "applicationCategory": "DeveloperApplication",
+    "downloadUrl": "https://yorozu-craft.com/pac-tester/pac-tester.html",
+    "fileSize": "370KB",
+    "softwareRequirements": "Microsoft Edge・Google Chrome・Firefox・Safari などの新しいブラウザ",
     "operatingSystem": "All",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
     "inLanguage": "ja"
@@ -42,33 +45,59 @@
 
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <!-- PWA-BEGIN -->
-  <link rel="manifest" href="./manifest.webmanifest">
-  <!-- PWA-END -->
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
   <header class="app-header">
-    <h1>__TITLE__</h1>
-    <p class="subtitle">__DESCRIPTION__</p>
+    <h1>PAC ファイル テスター</h1>
+    <p class="subtitle">proxy.pac の FindProxyForURL を URL の一覧でまとめてテスト。構文チェックと新旧の差分比較つき。</p>
   </header>
 
   <main class="app-main">
 
-    <!-- ここにツール本体を書く（例: 金額を 100 円単位で切り上げる） -->
-    <section class="card" aria-labelledby="tool-heading">
-      <h2 id="tool-heading">計算</h2>
-      <div class="field">
-        <label for="amount">金額</label>
-        <p class="hint">入力内容はこの端末のブラウザにだけ保存され、外部には送信されません。</p>
-        <input type="number" id="amount" inputmode="numeric" placeholder="例：1234">
+    <section class="card hero" aria-labelledby="h-get">
+      <h2 id="h-get">ダウンロードして使う（無料）</h2>
+      <p>本体は <strong>pac-tester.html という 1 つのファイル</strong>です。パソコンに保存して、ダブルクリックするとブラウザで開きます。<strong>インストール不要・通信しない</strong>ので、ソフトを入れられない職場の PC やネットにつながらない環境でも使えます。</p>
+      <div class="cta">
+        <a class="btn btn-big" href="./pac-tester.html" download="pac-tester.html">ダウンロード（pac-tester.html・約 370KB）</a>
+        <a class="btn btn-sub" href="./pac-tester.html" target="_blank" rel="noopener">ブラウザで試す</a>
       </div>
-      <p>結果：<strong id="result" aria-live="polite">—</strong></p>
-      <button type="button" id="share" class="btn">結果を開くリンクをコピー</button>
+      <p class="small">「ブラウザで試す」は、ダウンロードするものと同じファイルを開きます。広告やアクセス解析は入っていません（広告はこの紹介ページと使い方ページだけです）。</p>
     </section>
 
-    <p class="small"><a href="./guide.html">使い方・よくある質問・ご利用上の注意</a></p>
+    <section class="card content" aria-labelledby="h-feat">
+      <h2 id="h-feat">できること</h2>
+      <ul class="feature-list">
+        <li><strong>URL の一覧でまとめて評価</strong>：1 行に 1 つの URL を並べると、それぞれの戻り値（<code>DIRECT</code>・<code>PROXY host:port; …</code>）を表にします。ホスト名は URL から自動で取り出します</li>
+        <li><strong>戻り値ごとに色分け・絞り込み・CSV 保存</strong>：<code>alert()</code> の出力、エラー、タイムアウトも行ごとに出します</li>
+        <li><strong>標準のヘルパー関数</strong>：<code>isInNet</code>・<code>shExpMatch</code>・<code>dnsDomainIs</code>・<code>weekdayRange</code>・<code>timeRange</code> など 14 個。DNS の代わりに「ホスト名と IP アドレスの対応表」、<code>myIpAddress()</code> の値、評価に使う日時を自分で決められます</li>
+        <li><strong>構文・ロジックのチェック</strong>：全角スペースや全角記号の混入（コメントの中は除く）、括弧・引用符の対応、最後の <code>return</code> 漏れ、<code>shExpMatch</code> のパターンの誤り（<code>*</code> の付け忘れ、スキーム付きなど）、<strong>上のルールが下のルールを隠している</strong>ケースを見つけます</li>
+        <li><strong>差分モード</strong>：旧 PAC と新 PAC を同じ URL の一覧で評価し、<strong>結果が変わった URL だけ</strong>を強調します。更新のたびに「意図した変更だけが起きているか」を確かめられます</li>
+        <li><strong>無限ループでも固まらない</strong>：1 つの URL につき 0.2 秒で打ち切ります</li>
+      </ul>
+    </section>
+
+    <section class="card content" aria-labelledby="h-steps">
+      <h2 id="h-steps">使い方（3 ステップ）</h2>
+      <ol>
+        <li>上の「ダウンロード」で pac-tester.html を保存して、ダブルクリックで開く</li>
+        <li>左の欄に PAC を貼り付ける（.pac ファイルをドラッグ＆ドロップしても開けます）</li>
+        <li>右の欄にテストしたい URL を 1 行に 1 つ書く。入力するたびに自動で評価され、結果の表とチェックの結果が出ます</li>
+      </ol>
+      <p class="small">はじめて開くと、架空のドメインを使った見本の PAC と URL の一覧が出ます。</p>
+    </section>
+
+    <section class="card content" aria-labelledby="h-safe">
+      <h2 id="h-safe">貼った PAC は外に出ない・隔離して実行する</h2>
+      <ul>
+        <li>pac-tester.html は、構文を調べるライブラリ（acorn）も含めて 1 ファイルの中に入っています。<strong>外部のサーバーには一切接続しません</strong>（ブラウザの仕組み Content-Security-Policy でも通信を禁止しています）。社内のホスト名が入った PAC でも、どこにも送られません</li>
+        <li>PAC は JavaScript のプログラムなので、<strong>ページとは別の、隔離した枠（sandbox の iframe）の中の Worker</strong> で実行します。PAC のコードからは、このページの画面や保存領域には触れられず、通信もできません</li>
+        <li>貼った PAC は、既定ではブラウザにも保存しません（保存するかどうかは自分で選べます）</li>
+      </ul>
+    </section>
+
+    <p class="card" style="text-align:center"><a href="./guide.html">使い方・ヘルパー関数の一覧・よくあるミス・差分モード・よくある質問・ライセンス</a></p>
 
   </main>
 
@@ -76,7 +105,7 @@
     <nav class="footer-nav" aria-label="フッターナビゲーション">
       <ul>
         <li><a href="../">yorozu-craft トップ</a></li>
-        <li><a href="./" aria-current="page">__TITLE__</a></li>
+        <li><a href="./" aria-current="page">PAC ファイル テスター</a></li>
         <li><a href="./guide.html">使い方・よくある質問</a></li>
         <li><a href="../about.html">運営者情報</a></li>
         <li><a href="../privacy-policy.html">プライバシーポリシー</a></li>
@@ -85,9 +114,6 @@
     <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
   </footer>
 
-  <script src="./constants.js"></script>
-  <script src="./calc.js"></script>
-  <script src="./main.js"></script>
   <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
