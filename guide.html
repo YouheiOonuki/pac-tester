@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>使い方・よくある質問｜__TITLE__｜yorozu-craft</title>
-  <meta name="description" content="__TITLE__の使い方、計算の根拠、よくある質問、ご利用上の注意。">
+  <title>使い方・よくある質問｜PAC ファイル テスター｜yorozu-craft</title>
+  <meta name="description" content="PAC ファイル テスターの使い方。PAC（proxy.pac）の基本、isInNet・shExpMatch などヘルパー関数の一覧と注意点、よくあるミス（全角スペース・return 漏れ・ルールの隠れ）、差分モード、安全性、よくある質問。">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://yorozu-craft.com/__REPO__/guide.html">
+  <link rel="canonical" href="https://yorozu-craft.com/pac-tester/guide.html">
 
-  <meta property="og:title" content="使い方・よくある質問｜__TITLE__">
-  <meta property="og:description" content="__TITLE__の使い方、計算の根拠、よくある質問、ご利用上の注意。">
+  <meta property="og:title" content="使い方・よくある質問｜PAC ファイル テスター">
+  <meta property="og:description" content="PAC ファイル テスターの使い方。PAC（proxy.pac）の基本、isInNet・shExpMatch などヘルパー関数の一覧と注意点、よくあるミス（全角スペース・return 漏れ・ルールの隠れ）、差分モード、安全性、よくある質問。">
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://yorozu-craft.com/__REPO__/guide.html">
+  <meta property="og:url" content="https://yorozu-craft.com/pac-tester/guide.html">
   <meta property="og:site_name" content="yorozu-craft">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:image" content="https://yorozu-craft.com/__REPO__/og-image.png">
+  <meta property="og:image" content="https://yorozu-craft.com/pac-tester/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -28,12 +28,74 @@
       {
         "@type": "Question",
         "name": "無料で使えますか？",
-        "acceptedAnswer": { "@type": "Answer", "text": "はい。会員登録やインストールも不要で、ブラウザだけで使えます。" }
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。会員登録もインストールも不要で、ダウンロードした HTML ファイル（pac-tester.html）をブラウザで開くだけで使えます。"
+        }
       },
       {
         "@type": "Question",
-        "name": "入力した内容はどこに保存されますか？",
-        "acceptedAnswer": { "@type": "Answer", "text": "お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。" }
+        "name": "貼り付けた PAC は、どこかに送信されますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。pac-tester.html は外部のサーバーに一切接続しません。ブラウザの仕組み（Content-Security-Policy）でも通信を禁止しています。PAC はページとは別の、隔離した枠（sandbox の iframe）の中の Worker で実行するので、PAC のコードからも通信はできません。PAC の中身は、既定ではブラウザにも保存しません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "実際のブラウザと結果が違うことはありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "あります。このツールは DNS を引かず、「ホスト名と IP アドレスの対応表」に書いたものだけを解決できるものとして扱います。時刻も「評価に使う日時」の設定を使います。また、ブラウザや OS ごとに PAC の実装が少しずつ違います（https の URL のパスを渡すか、shExpMatch で使える記号、dateRange の月末の扱いなど）。最終的な確認は、実際に使うブラウザ・OS で行ってください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "isInNet や dnsResolve は、どうやって IP アドレスを調べますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ブラウザからは DNS を引けないので、「評価の設定」の「ホスト名と IP アドレスの対応表」を使います。対応表に無いホストは「解決できない」（dnsResolve は null、isResolvable と isInNet は false）になります。IP アドレスをそのまま書いた URL は、そのアドレスとして扱います。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "https の URL で、パスを使った判定が効きません。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Chrome・Edge などは、https の URL のパスとクエリを PAC に渡さず「https://ホスト名/」だけを渡します。このツールも既定で同じ動きにしています（評価の設定で変えられます）。https の通信をパスで振り分けることはできないので、ホスト名で判定してください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無限ループする PAC を入れても大丈夫ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "大丈夫です。1 つの URL の評価が 0.2 秒を超えると、その評価を止めて「タイムアウト」と表示し、次の URL に進みます。評価は画面とは別の Worker で行うので、画面は固まりません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "isInNetEx などの Microsoft の拡張関数や、IPv6 には対応していますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "対応していません。isResolvableEx・dnsResolveEx・myIpAddressEx・isInNetEx・sortIpAddressList などの拡張関数は、呼ぶとエラーになります。対応表や myIpAddress も IPv4 アドレスだけを扱います。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Shift_JIS の PAC ファイルも開けますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。UTF-8 として読めないファイルは Shift_JIS として読みます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "スマホでも使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "「ブラウザで試す」から使えます。画面が狭いときは、PAC・チェック・URL・結果が縦に並びます。PAC の確認はパソコンでの利用を主に想定しています。"
+        }
       }
     ]
   }
@@ -51,40 +113,160 @@
 <body>
 
   <header class="app-header">
-    <h1>__TITLE__ の使い方</h1>
-    <p class="subtitle">使い方・計算の根拠・よくある質問・ご利用上の注意</p>
+    <h1>PAC ファイル テスター の使い方</h1>
+    <p class="subtitle">PAC の基本・ヘルパー関数の一覧・よくあるミス・差分モード・安全性・よくある質問</p>
   </header>
 
   <main class="app-main">
 
-    <p class="card" style="text-align:center"><a href="./">▶ __TITLE__ を使う</a></p>
+    <p class="card" style="text-align:center"><a href="./">▶ PAC ファイル テスターのダウンロードはこちら</a></p>
+
+    <nav class="card content" aria-label="このページの目次">
+      <ol>
+        <li><a href="#basics">PAC の基本</a></li>
+        <li><a href="#howto">使い方</a></li>
+        <li><a href="#helpers">ヘルパー関数の一覧と注意点</a></li>
+        <li><a href="#mistakes">よくあるミス（チェックで見つけるもの）</a></li>
+        <li><a href="#diff">差分モード</a></li>
+        <li><a href="#safety">安全性（貼った PAC は外に出ない・隔離して実行）</a></li>
+        <li><a href="#licenses">ライセンス一覧</a></li>
+        <li><a href="#faq">よくある質問</a></li>
+        <li><a href="#notes">ご利用上の注意・データの扱い</a></li>
+      </ol>
+    </nav>
+
+    <article class="card content" id="basics">
+      <h2>PAC の基本</h2>
+      <p>PAC（Proxy Auto-Configuration）ファイルは、ブラウザや OS が「この URL にはどのプロキシを使うか」を決めるための JavaScript のファイルです（名前は <code>proxy.pac</code> や <code>wpad.dat</code> がよく使われます）。中には <code>FindProxyForURL(url, host)</code> という関数を 1 つ書きます。ブラウザは URL を開くたびにこの関数を呼び、戻り値の文字列に従って接続します。</p>
+      <pre>function FindProxyForURL(url, host) {
+  if (isPlainHostName(host)) return "DIRECT";
+  if (dnsDomainIs(host, ".example.com")) return "DIRECT";
+  return "PROXY proxy.example.net:8080; DIRECT";
+}</pre>
+      <ul>
+        <li><code>url</code> は URL 全体（例: <code>http://www.example.com/a/b</code>）、<code>host</code> はホスト名だけ（例: <code>www.example.com</code>。小文字で、ポート番号は含まない）</li>
+        <li>戻り値は <code>"DIRECT"</code>（プロキシを通さない）か <code>"PROXY ホスト:ポート"</code>。<code>;</code> で区切って並べると、前のものが使えないときに次のものを使います</li>
+        <li><code>SOCKS ホスト:ポート</code>・<code>HTTPS ホスト:ポート</code> などが使えるブラウザもあります</li>
+      </ul>
+    </article>
 
     <article class="card content" id="howto">
       <h2>使い方</h2>
       <ol>
-        <li>（手順を書く）</li>
+        <li><a href="./">紹介ページ</a>の「ダウンロード」で <code>pac-tester.html</code> を保存し、ダブルクリックで開きます（「ブラウザで試す」でも同じものが開きます）</li>
+        <li>左の「PAC ファイル」の欄に PAC を貼り付けます。「開く」で .pac ファイルを選ぶか、画面にドラッグ＆ドロップしても開けます</li>
+        <li>右の「テストする URL」に、確かめたい URL を 1 行に 1 つ書きます。<code>http://</code> を省くと http として扱います。<code>#</code> で始まる行はメモです。一覧は「.txt を開く」「.txt で保存」で読み書きできます</li>
+        <li>入力するたびに自動で評価されます（Ctrl+Enter か「評価する」でもすぐ評価します）。「結果」の表に、URL ごとの戻り値が出ます</li>
+        <li>結果の上の色つきのボタンは、戻り値ごとの件数です。押すとその戻り値の行だけに絞り込みます。文字での絞り込み、「エラー・注意だけ」、「CSV で保存」もできます</li>
+        <li>「構文・ロジックのチェック」に、見つかった問題が出ます。押すと PAC のその行に移動します</li>
       </ol>
+      <h3>評価の設定</h3>
+      <ul>
+        <li><strong>ホスト名と IP アドレスの対応表</strong>：DNS の代わりです。<code>dnsResolve</code>・<code>isInNet</code>・<code>isResolvable</code> がこの表を使います。1 行に「ホスト名 IP アドレス」（hosts ファイルと同じ「IP アドレス ホスト名」の順でも可）。<code>*.example.com 10.0.0.1</code> と書くと、その下のホストすべてに当てはめます</li>
+        <li><strong>myIpAddress() が返す IP アドレス</strong>：拠点ごとにプロキシを分ける PAC を、拠点の IP アドレスを入れて確かめられます</li>
+        <li><strong>評価に使う日時</strong>：<code>weekdayRange</code>・<code>dateRange</code>・<code>timeRange</code> が使う日時と、UTC との時差です。「いまの日時を使う」を外すと、好きな日時で確かめられます</li>
+        <li><strong>https の URL は、パスとクエリを除いて渡す</strong>：Chrome・Edge などと同じ動きです（既定でオン）</li>
+      </ul>
     </article>
 
-    <!-- 制度・単価など時点のある値を使うツールだけ残す。値は constants.js、画面にも時点を出す -->
-    <article class="card content" id="basis">
-      <h2>根拠と確認日</h2>
-      <dl class="info-list">
-        <dt>根拠</dt>
-        <dd>（法令・公式ページの名前）</dd>
-        <dt>最終確認日</dt>
-        <dd><time datetime="__DATE__">__DATE_JA__</time></dd>
-      </dl>
-      <p class="small">制度や単価は変わることがあります。最終確認日から時間がたっている場合は、公式ページで最新の情報をご確認ください。</p>
+    <article class="card content" id="helpers">
+      <h2>ヘルパー関数の一覧と注意点</h2>
+      <p>PAC の中で使える標準の関数です。動きは Firefox・Chromium の実装（どちらも Netscape の元の実装を引き継いだもの）に合わせています。</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>関数</th><th>働き</th><th>注意点</th></tr></thead>
+          <tbody>
+            <tr><td><code>isPlainHostName(host)</code></td><td>ホスト名にドットが無いか（例: <code>intranet</code>）</td><td>IPv6 アドレス（<code>:</code> を含む）は false</td></tr>
+            <tr><td><code>dnsDomainIs(host, domain)</code></td><td><code>host</code> が <code>domain</code> で終わるか</td><td>大文字・小文字を区別する。<code>"example.com"</code> のように先頭のドットが無いと <code>badexample.com</code> にも当てはまる</td></tr>
+            <tr><td><code>localHostOrDomainIs(host, hostdom)</code></td><td>完全に同じか、ドメイン無しの名前が <code>hostdom</code> の先頭と同じか</td><td><code>localHostOrDomainIs("www", "www.example.com")</code> は true</td></tr>
+            <tr><td><code>isResolvable(host)</code></td><td>IP アドレスに解決できるか</td><td>対応表に無いホストは false</td></tr>
+            <tr><td><code>isInNet(host, pattern, mask)</code></td><td>IP アドレスがそのネットワークに入るか</td><td>ホスト名は対応表で IP にしてから比べる。マスクは <code>"255.255.0.0"</code> の形（<code>/16</code> は使えない）</td></tr>
+            <tr><td><code>dnsResolve(host)</code></td><td>IP アドレスを返す</td><td>解決できなければ <code>null</code></td></tr>
+            <tr><td><code>convert_addr(ip)</code></td><td>IP アドレスを 32 ビットの整数にする</td><td>ブラウザと同じく符号付き（<code>192.168.0.1</code> は負の数）</td></tr>
+            <tr><td><code>myIpAddress()</code></td><td>自分の IP アドレス</td><td>評価の設定の値を返す</td></tr>
+            <tr><td><code>dnsDomainLevels(host)</code></td><td>ドットの数</td><td><code>www.example.com</code> は 2</td></tr>
+            <tr><td><code>shExpMatch(str, pattern)</code></td><td>ワイルドカードでの一致</td><td><code>*</code> は 0 文字以上、<code>?</code> は 1 文字。<strong>全体が一致したときだけ</strong> true。大文字・小文字を区別する。ほかの記号は文字そのもの（ブラウザによっては <code>[ ]</code> や <code>+</code> が正規表現として効いてしまうので、使わないのが安全）</td></tr>
+            <tr><td><code>weekdayRange(wd1, wd2, "GMT")</code></td><td>曜日の範囲</td><td><code>"MON"</code> のように大文字の英語 3 文字。<code>"FRI", "MON"</code> のように週をまたげる。最後に <code>"GMT"</code> で UTC の曜日</td></tr>
+            <tr><td><code>dateRange(…)</code></td><td>日・月・年の範囲</td><td>終わりに月だけを書くと、その月の末日まで（ブラウザの実装では 31 日の無い月で数日ずれることがある）</td></tr>
+            <tr><td><code>timeRange(…)</code></td><td>時刻の範囲</td><td><code>timeRange(9, 17)</code> は 9:00〜17:59。時だけの指定は日をまたがない（<code>timeRange(22, 6)</code> は常に false）。<code>timeRange(22, 0, 6, 0)</code> なら日をまたげる</td></tr>
+            <tr><td><code>alert(message)</code></td><td>メッセージを出す</td><td>結果の表の、その URL の行に出る</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>PAC の中で <code>eval</code> や <code>new Function</code> は使えません（安全のため禁止しています）。<code>new Date()</code> を直接使うと、評価の設定ではなく端末の時計になります。</p>
+    </article>
+
+    <article class="card content" id="mistakes">
+      <h2>よくあるミス（チェックで見つけるもの）</h2>
+      <ul>
+        <li><strong>全角スペース・全角記号の混入</strong>：日本語のコメントを書いたあとに、全角スペースや全角の括弧・引用符がコードに紛れ込むことがあります。全角スペースは JavaScript では空白として通ってしまうので、ブラウザでは気づきにくいミスです。コメントの中は問題なし、文字列の中は「注意」、コードの中は「エラー」として出します</li>
+        <li><strong>括弧・引用符の対応</strong>：<code>{ }</code>・<code>( )</code>・<code>[ ]</code> の対応がずれている場所と、閉じていない引用符を、行の番号つきで出します。構文エラーの内容も日本語で出します</li>
+        <li><strong>最後の return 漏れ</strong>：どの <code>if</code> にも当てはまらない URL で、関数の最後まで来てしまう書き方です。戻り値が <code>undefined</code> になり、ブラウザによって動きが変わります。最後に <code>return "DIRECT";</code> などを書きます</li>
+        <li><strong>shExpMatch のパターンの誤り</strong>：<code>shExpMatch(host, ".example.com")</code>（<code>*</code> の付け忘れで、どのホストにも当たらない）、<code>shExpMatch(host, "http://…")</code>（host にスキームは含まれない）、<code>shExpMatch(url, "http://www.example.com")</code>（url の最後の <code>/</code> が抜けている）、大文字の入ったパターンなど。パターンの一覧も出します</li>
+        <li><strong>ルールの隠れ</strong>：<code>shExpMatch(host, "*.example.com")</code> の <code>return</code> より後に <code>shExpMatch(host, "www.example.com")</code> を書くと、下のルールには決して届きません。単純な <code>if (shExpMatch(…)) return …;</code> の並び（<code>||</code>・<code>dnsDomainIs</code>・<code>host == "…"</code> を含む）について、上のパターンが下のパターンをすべて含んでいる場合を見つけます。戻り値が同じなら「参考」、違えば「注意」です</li>
+        <li><strong>戻り値の形</strong>：<code>"PROXY proxy.example.net:8080, DIRECT"</code>（区切りは <code>;</code>）、<code>"PROXY"</code> だけ、ポート番号の範囲外など</li>
+        <li><strong>ヘルパー関数の使い方</strong>：<code>isInNet</code> のマスクの書き方、<code>weekdayRange("mon")</code>（小文字）、<code>timeRange(22, 6)</code> など</li>
+      </ul>
+      <p>チェックは構文を読み取って行う近似です。すべての誤りを見つけられるわけではありません。結果の表と合わせて確かめてください。</p>
+    </article>
+
+    <article class="card content" id="diff">
+      <h2>差分モード</h2>
+      <p>PAC を更新するときに「意図した URL の結果だけが変わっているか」を確かめるためのモードです。</p>
+      <ol>
+        <li>上の「差分モード」を押すと、PAC の欄が「旧 PAC（いまの版）」と「新 PAC（変更後）」の 2 つになります。新 PAC の欄には、はじめは旧 PAC と同じ内容が入ります</li>
+        <li>旧 PAC に今使っている PAC を、新 PAC に変更後の PAC を入れます（それぞれ「開く」やドラッグ＆ドロップでも入れられます）</li>
+        <li>同じ URL の一覧で両方を評価し、<strong>結果が変わった行だけに色と「変更」の印</strong>が付きます。変わった件数は結果の上に出ます。「変わった行だけ」で、変わった行に絞り込めます</li>
+      </ol>
+      <p>戻り値の <code>;</code> の前後の空白の違いは、変化として数えません。エラーやタイムアウトになった場合は変化として数えます。CSV には旧・新の両方の結果が入ります。</p>
+    </article>
+
+    <article class="card content" id="safety">
+      <h2>安全性（貼った PAC は外に出ない・隔離して実行）</h2>
+      <ul>
+        <li><strong>通信しない</strong>：構文を調べるライブラリ（acorn）も含めてすべて 1 つのファイルに入っていて、外部のサーバーには接続しません。ブラウザの仕組み（Content-Security-Policy の <code>connect-src 'none'</code> など）でも、外部からの読み込み・外部への送信を禁止しています</li>
+        <li><strong>隔離して実行</strong>：PAC はプログラムなので、他人から受け取った PAC に悪いコードが入っている可能性もあります。そこで PAC は、このページでは実行せず、<code>sandbox</code> 属性を付けた iframe（ページとは別のオリジン）の中で起動した Worker で実行します。PAC のコードからは、このページの画面・保存領域（localStorage など）・同じサイトのほかのツールには触れられません。枠と Worker にも同じ通信の禁止がかかるので、PAC から情報を送り出すこともできません</li>
+        <li><strong>止められる</strong>：1 つの URL の評価が 0.2 秒を超えたら、Worker ごと止めて作り直します。無限ループがあっても画面は固まりません</li>
+        <li><strong>保存しない</strong>：貼った PAC とテスト用の URL は、既定ではブラウザにも保存しません（「このブラウザに保存する」をオンにしたときだけ保存します）</li>
+        <li><strong>広告・アクセス解析なし</strong>：pac-tester.html には入っていません（広告はこの使い方ページと紹介ページだけです）</li>
+      </ul>
+    </article>
+
+    <article class="card content" id="licenses">
+      <h2>ライセンス一覧</h2>
+      <p>このツールのコードは MIT License です（<a href="https://github.com/YouheiOonuki/pac-tester" target="_blank" rel="noopener">GitHub</a>）。pac-tester.html には、次のライブラリをそのまま埋め込んでいます。</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>ライブラリ</th><th>バージョン</th><th>ライセンス</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td>acorn</td><td>8.18.0</td><td>MIT</td><td>PAC の構文を調べる（構文木を作るだけで、PAC は実行しない）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ライセンスの全文は、<a href="./THIRD_PARTY_LICENSES.txt">THIRD_PARTY_LICENSES.txt</a> と、pac-tester.html の「ライセンス」ボタンで見られます。</p>
     </article>
 
     <article class="card content" id="faq">
       <h2>よくある質問</h2>
       <dl class="faq">
         <dt>無料で使えますか？</dt>
-        <dd>はい。会員登録やインストールも不要で、ブラウザだけで使えます。</dd>
-        <dt>入力した内容はどこに保存されますか？</dt>
-        <dd>お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。</dd>
+        <dd>はい。会員登録もインストールも不要で、ダウンロードした HTML ファイル（pac-tester.html）をブラウザで開くだけで使えます。</dd>
+        <dt>貼り付けた PAC は、どこかに送信されますか？</dt>
+        <dd>いいえ。pac-tester.html は外部のサーバーに一切接続しません。ブラウザの仕組み（Content-Security-Policy）でも通信を禁止しています。PAC はページとは別の、隔離した枠（sandbox の iframe）の中の Worker で実行するので、PAC のコードからも通信はできません。PAC の中身は、既定ではブラウザにも保存しません。</dd>
+        <dt>実際のブラウザと結果が違うことはありますか？</dt>
+        <dd>あります。このツールは DNS を引かず、「ホスト名と IP アドレスの対応表」に書いたものだけを解決できるものとして扱います。時刻も「評価に使う日時」の設定を使います。また、ブラウザや OS ごとに PAC の実装が少しずつ違います（https の URL のパスを渡すか、shExpMatch で使える記号、dateRange の月末の扱いなど）。最終的な確認は、実際に使うブラウザ・OS で行ってください。</dd>
+        <dt>isInNet や dnsResolve は、どうやって IP アドレスを調べますか？</dt>
+        <dd>ブラウザからは DNS を引けないので、「評価の設定」の「ホスト名と IP アドレスの対応表」を使います。対応表に無いホストは「解決できない」（dnsResolve は null、isResolvable と isInNet は false）になります。IP アドレスをそのまま書いた URL は、そのアドレスとして扱います。</dd>
+        <dt>https の URL で、パスを使った判定が効きません。</dt>
+        <dd>Chrome・Edge などは、https の URL のパスとクエリを PAC に渡さず「https://ホスト名/」だけを渡します。このツールも既定で同じ動きにしています（評価の設定で変えられます）。https の通信をパスで振り分けることはできないので、ホスト名で判定してください。</dd>
+        <dt>無限ループする PAC を入れても大丈夫ですか？</dt>
+        <dd>大丈夫です。1 つの URL の評価が 0.2 秒を超えると、その評価を止めて「タイムアウト」と表示し、次の URL に進みます。評価は画面とは別の Worker で行うので、画面は固まりません。</dd>
+        <dt>isInNetEx などの Microsoft の拡張関数や、IPv6 には対応していますか？</dt>
+        <dd>対応していません。isResolvableEx・dnsResolveEx・myIpAddressEx・isInNetEx・sortIpAddressList などの拡張関数は、呼ぶとエラーになります。対応表や myIpAddress も IPv4 アドレスだけを扱います。</dd>
+        <dt>Shift_JIS の PAC ファイルも開けますか？</dt>
+        <dd>はい。UTF-8 として読めないファイルは Shift_JIS として読みます。</dd>
+        <dt>スマホでも使えますか？</dt>
+        <dd>「ブラウザで試す」から使えます。画面が狭いときは、PAC・チェック・URL・結果が縦に並びます。PAC の確認はパソコンでの利用を主に想定しています。</dd>
       </dl>
     </article>
 
@@ -92,18 +274,19 @@
     <article class="card content" id="notes">
       <h2>ご利用上の注意・データの扱い</h2>
       <ul>
-        <li><strong>保存されるデータ</strong>：（何をブラウザに保存するか。保存しないならそう書く）</li>
-        <li><strong>共有リンク</strong>：（共有機能があれば、リンクに何が含まれるか。URL の「#」以降に入るのでサーバーには送信されない）</li>
-        <li><strong>結果の扱い</strong>：（計算結果は目安であること、最終的な確認先など）</li>
+        <li><strong>結果の扱い</strong>：実際のブラウザや OS の評価結果とは、DNS・時刻・実装差によって異なることがあります。このツールは DNS を引かずに対応表を使い、時刻は設定した日時を使います。ブラウザ・OS ごとの PAC の実装の違い（https の URL のパスの扱い、使える関数や記号など）も再現しきれません。最終的な確認は、実際に使う環境で行ってください</li>
+        <li><strong>保存されるデータ</strong>：評価の設定（ホスト名と IP アドレスの対応表、myIpAddress の値、評価に使う日時と時差、https の扱い）を、お使いのブラウザの中（localStorage の <code>pac-tester_settings</code>）に保存します。PAC とテスト用の URL は、「このブラウザに保存する」をオンにしたときだけ <code>pac-tester_draft</code> に保存し、オフに戻すと消します。どれも外部には送信しません</li>
+        <li><strong>ファイルの扱い</strong>：開いた PAC や URL の一覧はブラウザの中で読むだけで、どこにも送信しません。CSV や URL の一覧の保存はダウンロードとして行います</li>
+        <li><strong>見本</strong>：見本の PAC は、架空のドメイン（example.com・example.net・example.org・.example）とプライベート・文書用の IP アドレスだけを使った一般的な例です</li>
       </ul>
-      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=__REPO__" target="_blank" rel="noopener">ご要望・不具合の報告（Google フォーム）</a>：いただいた内容をもとに直します。お返事はしていません。</p>
+      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=pac-tester" target="_blank" rel="noopener">ご要望・不具合の報告（Google フォーム）</a>：いただいた内容をもとに直します。お返事はしていません。</p>
       <p>サイト全体の運営者情報・免責事項は<a href="../about.html">こちら</a>、プライバシーポリシーは<a href="../privacy-policy.html">こちら</a>です（すべてのツールで共通）。</p>
     </article>
 
     <article class="card content" id="changelog">
       <h2>更新履歴</h2>
       <ul>
-        <li><time datetime="__DATE__">__DATE_JA__</time> 公開</li>
+        <li><time datetime="2026-09-24">2026年9月24日</time> 公開</li>
       </ul>
     </article>
 
@@ -113,7 +296,7 @@
     <nav class="footer-nav" aria-label="フッターナビゲーション">
       <ul>
         <li><a href="../">yorozu-craft トップ</a></li>
-        <li><a href="./">__TITLE__</a></li>
+        <li><a href="./">PAC ファイル テスター</a></li>
         <li><a href="./guide.html" aria-current="page">使い方・よくある質問</a></li>
         <li><a href="../about.html">運営者情報</a></li>
         <li><a href="../privacy-policy.html">プライバシーポリシー</a></li>

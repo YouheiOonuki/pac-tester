@@ -1,5 +1,5 @@
 /* ===========================
-   __TITLE__ — yorozu-craft 共通の和紙風の配色
+   PAC ファイル テスター — yorozu-craft 共通の和紙風の配色
    色はトークン（--bg / --card / --text / --muted / --accent / --border）だけを使う。
    ダークモードは端末の設定に自動で合わせる（prefers-color-scheme。手動切替は付けない）
    =========================== */
@@ -128,3 +128,25 @@ a { color: var(--accent); }
 @media (max-width: 480px) {
   .app-header h1 { font-size: 1.2rem; }
 }
+
+/* ===== PAC ファイル テスター固有（紹介ページ・使い方ページ） ===== */
+.hero p { font-size: 0.93rem; }
+.cta { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin: 1rem 0 0.6rem; }
+.btn { text-decoration: none; text-align: center; }
+.btn-big { font-size: 1.05rem; padding: 0.75rem 1.4rem; }
+.btn-sub { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border); }
+.btn:hover { filter: brightness(1.08); }
+.content code, .hero code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "BIZ UDGothic", monospace;
+  font-size: 0.85em; background: var(--accent-soft); padding: 0.05em 0.3em; border-radius: 4px;
+}
+.feature-list li + li { margin-top: 0.35rem; }
+.content pre {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "BIZ UDGothic", monospace;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.6rem 0.8rem; font-size: 0.8rem; line-height: 1.5; overflow-x: auto; margin: 0.4rem 0;
+}
+.table-wrap { overflow-x: auto; margin: 0.4rem 0; }
+.tbl { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+.tbl th, .tbl td { border-bottom: 1px solid var(--border); padding: 0.35rem 0.45rem; text-align: left; vertical-align: top; }
+.tbl thead th { color: var(--muted); }
