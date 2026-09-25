@@ -194,6 +194,9 @@ function build({ lang, file, strip }) {
     scriptTag(js('src/core.js'), B.scriptCore),
     scriptTag('window.PT_SANDBOX_HTML = ' + jsString(sandboxHtml) + ';', B.scriptSandbox),
     scriptTag(js('src/app.js'), B.scriptApp),
+    // 全ツール共通の「保存した内容をすべて消す」（src/reset-storage.js）。確認の文はボタンの data-reset-confirm（messages.js）から出すので、
+    // 中の既定の文（日本語・英語）は外す（英語版に日本語を残さない。日英で同じコードにする）
+    scriptTag(js('src/reset-storage.js').replace(/\n  var MSG = \{[\s\S]*?\n  \};\n/, '\n  var MSG = {};\n'), B.scriptReset),
   ].join('\n');
 
   const libList = LIBS.map((l) => '        <li>' + esc(fmt(B.libItem, { name: l.name, version: l.version, license: l.license, use: B[l.useKey] })) + '</li>').join('\n');

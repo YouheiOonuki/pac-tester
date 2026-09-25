@@ -202,17 +202,18 @@ function sandboxScript(code) {
   return { html, code: s[1] };
 }
 
-test('ビルド: 日本語版と英語版は、文言（window.PT_MSG）のほかは同じコード（acorn・core.js・隔離用の枠・app.js）', () => {
+test('ビルド: 日本語版と英語版は、文言（window.PT_MSG）のほかは同じコード（acorn・core.js・隔離用の枠・app.js・reset-storage.js）', () => {
   const ja = scriptsOf(read('pac-tester.html'));
   const en = scriptsOf(read('pac-tester-en.html'));
-  assert.equal(ja.length, 5);
-  assert.equal(en.length, 5);
-  // 0: acorn（そのまま）、1: 文言、2: core.js、3: 隔離用の枠、4: app.js
+  assert.equal(ja.length, 6);
+  assert.equal(en.length, 6);
+  // 0: acorn（そのまま）、1: 文言、2: core.js、3: 隔離用の枠、4: app.js、5: reset-storage.js（保存した内容をすべて消す）
   assert.equal(en[0].code, ja[0].code, 'acorn');
   assert.match(ja[1].code, /^window\.PT_MSG = /);
   assert.match(en[1].code, /^window\.PT_MSG = /);
   assert.deepEqual(tokens(en[2].code), tokens(ja[2].code), 'core.js');
   assert.deepEqual(tokens(en[4].code), tokens(ja[4].code), 'app.js');
+  assert.deepEqual(tokens(en[5].code), tokens(ja[5].code), 'reset-storage.js');
   const sj = sandboxScript(ja[3].code), se = sandboxScript(en[3].code);
   assert.deepEqual(tokens(se.code), tokens(sj.code), 'sandbox.html の script（pac-runtime.js・worker.js を含む）');
   assert.match(sj.html, /<html lang="ja">/);
