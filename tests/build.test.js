@@ -102,7 +102,7 @@ eachBuild('script 要素が途中で閉じていない（埋め込んだコー�
   const opens = (html.match(/<script\b/gi) || []).length;
   const closes = (html.match(/<\/script>/gi) || []).length;
   assert.equal(opens, closes);
-  assert.equal(opens, 6);   // acorn・文言・core.js・隔離用の枠・app.js・ライセンス
+  assert.equal(opens, 7);   // acorn・文言・core.js・隔離用の枠・app.js・reset-storage.js・ライセンス
 });
 
 test('index.html は日本語版、en/index.html・en/guide.html は英語版へリンクし、ダウンロード版はサイトマップに載せない', () => {

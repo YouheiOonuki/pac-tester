@@ -376,6 +376,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
           <label class="pt-check"><input type="checkbox" id="pt-strip-https"> Strip the path and query from https URLs (as Chrome and Edge do. Example: https://www.example.com/a?b → https://www.example.com/)</label>
         </div>
         <p class="pt-hint">Settings are saved in this browser (separately from the PAC). &quot;Sample&quot; restores the sample settings.</p>
+        <p><button type="button" class="pt-small" data-reset-storage="pac-tester_" data-reset-confirm="Delete everything this tool has saved in this browser (inputs, history, settings) and reset it to the initial state? This cannot be undone.">Delete everything saved (reset)</button></p>
       </details>
 
       <section class="pt-card" aria-labelledby="pt-h-results">
@@ -8621,6 +8622,73 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"en\">\n\u003ch
 
   init();
 })();
+
+</script>
+<script>/* yorozu-craft shared: reset-storage.js (delete everything saved) | MIT */
+(function (root) {
+  'use strict';
+
+  function splitList(s) {
+    return String(s || '').split(/[\s,]+/).filter(function (x) { return x !== ''; });
+  }
+
+  function keysToRemove(keys, prefixes, legacy) {
+    prefixes = (prefixes || []).filter(function (p) { return p !== ''; });
+    legacy = legacy || [];
+    return keys.filter(function (k) {
+      if (legacy.indexOf(k) !== -1) return true;
+      for (var i = 0; i < prefixes.length; i++) if (k.indexOf(prefixes[i]) === 0) return true;
+      return false;
+    });
+  }
+
+  function clear(storage, prefixes, legacy) {
+    var all = [];
+    for (var i = 0; i < storage.length; i++) {
+      var k = storage.key(i);
+      if (k !== null) all.push(k);
+    }
+    var gone = keysToRemove(all, prefixes, legacy);
+    gone.forEach(function (k) { try { storage.removeItem(k); } catch (e) {   } });
+    return gone;
+  }
+
+  var api = { keysToRemove: keysToRemove, clear: clear, splitList: splitList };
+  if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
+  root.ResetStorage = api;
+
+  var MSG = {};
+
+  function wire(btn) {
+    function run() {
+      var lang = /^en\b/i.test(document.documentElement.lang || '') ? 'en' : 'ja';
+      if (!root.confirm(btn.getAttribute('data-reset-confirm') || MSG[lang])) return;
+      var prefixes = splitList(btn.getAttribute('data-reset-storage'));
+      var legacy = splitList(btn.getAttribute('data-reset-legacy'));
+      try {
+        clear(root.localStorage, prefixes, legacy);
+        var setItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (k, v) {
+          if (keysToRemove([String(k)], prefixes, legacy).length) return;
+          return setItem.call(this, k, v);
+        };
+      } catch (e) {   }
+      root.location.replace(root.location.pathname + root.location.search);
+    }
+    if (!btn.hasAttribute('data-reset-hold')) { btn.addEventListener('click', run); return; }
+    var timer = null;
+    function up() { if (timer) { clearTimeout(timer); timer = null; } }
+    btn.addEventListener('pointerdown', function () { up(); timer = setTimeout(function () { timer = null; run(); }, 1000); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { btn.addEventListener(ev, up); });
+    btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  }
+
+  function init() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-reset-storage]'), wire);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})(typeof window !== 'undefined' ? window : this);
 
 </script>
 <script type="text/plain" id="licenses">
