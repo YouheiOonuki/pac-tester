@@ -101,26 +101,26 @@
     <article class="card content" id="howto">
       <h2>How to use</h2>
       <ol>
-        <li>Download <code>pac-tester.html</code> from the <a href="./">download page</a> and double-click it</li>
-        <li>Paste your PAC into the <span lang="ja">PAC ファイル</span> (PAC file) box on the left</li>
-        <li>In <span lang="ja">テストする URL</span> (URLs to test) on the right, write one URL per line</li>
-        <li>It evaluates as you type. The <span lang="ja">結果</span> (Results) table shows the return value for each URL</li>
+        <li>Download <code>pac-tester-en.html</code> from the <a href="./">download page</a> and double-click it</li>
+        <li>Paste your PAC into the PAC file box on the left</li>
+        <li>In URLs to test on the right, write one URL per line</li>
+        <li>It evaluates as you type. The Results table shows the return value for each URL</li>
       </ol>
       <details class="more">
         <summary>More on the screen and the evaluation settings</summary>
-        <p>The tool's screen is in Japanese. The <a href="./#ui">label table on the download page</a> gives the English meaning of each label.</p>
+        <p>A <a href="../" hreflang="ja">Japanese version</a> of the tool (pac-tester.html) is also available.</p>
         <ul>
-          <li>Choose a .pac file with <span lang="ja">開く</span> (Open) or drag and drop it onto the page</li>
+          <li>Choose a .pac file with the Open button or drag and drop it onto the page</li>
           <li>Without <code>http://</code> a URL line is treated as http. Lines starting with <code>#</code> are comments. The list loads from and saves to a .txt file</li>
-          <li>Ctrl+Enter or <span lang="ja">評価する</span> evaluates at once</li>
+          <li>Ctrl+Enter or the Evaluate button evaluates at once</li>
           <li>The coloured buttons above the results are the counts for each return value; click one to show only those rows. Filter by text, show only errors and warnings, or save as CSV</li>
-          <li>Problems found in the script are listed under <span lang="ja">構文・ロジックのチェック</span> (Syntax and logic checks). Click one to jump to the line</li>
+          <li>Problems found in the script are listed under Syntax and logic checks. Click one to jump to the line</li>
         </ul>
         <p><strong>Evaluation settings</strong></p>
       <ul>
         <li><strong>Host-to-IP table</strong>: replaces DNS for <code>dnsResolve</code>, <code>isInNet</code> and <code>isResolvable</code>. One entry per line, as "host IP" or in hosts-file order "IP host". <code>*.example.com 10.0.0.1</code> applies to every host under that domain</li>
         <li><strong>IP address returned by myIpAddress()</strong>: test a PAC that picks a proxy per site by entering that site's client address</li>
-        <li><strong>Date and time</strong>: the date, time and UTC offset used by <code>weekdayRange</code>, <code>dateRange</code> and <code>timeRange</code>. Untick "use the current date and time" to test any moment you like</li>
+        <li><strong>Date and time</strong>: the date, time and UTC offset used by <code>weekdayRange</code>, <code>dateRange</code> and <code>timeRange</code>. Untick "Use the current date and time" to test any moment you like</li>
         <li><strong>Strip the path and query from https URLs</strong>: matches Chrome and Edge (on by default)</li>
       </ul>
       </details>
@@ -129,9 +129,9 @@
       <details class="more">
         <summary>How diff mode works</summary>
       <ol>
-        <li>Press <span lang="ja">差分モード</span> (Diff mode). The PAC box splits into <span lang="ja">旧 PAC（いまの版）</span> (old, current) and <span lang="ja">新 PAC（変更後）</span> (new, changed). The new box starts with a copy of the old one</li>
+        <li>Press Diff mode. The PAC box splits into Old PAC (current) and New PAC (changed). The new box starts with a copy of the old one</li>
         <li>Put the PAC in use now in the old box and the changed PAC in the new box (Open and drag and drop work for each)</li>
-        <li>Both are evaluated against the same URLs. <strong>Only rows whose result changed</strong> are coloured and marked <span lang="ja">変更</span> (Changed). The number of changes appears above the results, and <span lang="ja">変わった行だけ</span> shows only the changed rows</li>
+        <li>Both are evaluated against the same URLs. <strong>Only rows whose result changed</strong> are coloured and marked Changed. The number of changes appears above the results, and ticking Changed rows only hides the other rows</li>
       </ol>
       <p>Differences in whitespace around <code>;</code> in the return value don't count as changes. Errors and timeouts do. The CSV includes both old and new results.</p>
       </details>
@@ -211,9 +211,9 @@
         <li><strong>Sandboxed execution</strong>: a PAC is a program, and one you received from someone else could contain harmful code. So the PAC doesn't run in the page. It runs in a Worker started inside an iframe with the <code>sandbox</code> attribute (a different origin from the page). It can't reach the page, its storage (localStorage and so on) or other tools on this site. The same network restrictions apply to the iframe and the Worker, so the PAC can't send data out</li>
         <li><strong>Stoppable</strong>: if one URL takes longer than 0.2 seconds, the Worker is terminated and recreated. An infinite loop won't freeze the page</li>
         <li><strong>Not saved by default</strong>: the PAC and test URLs are saved in the browser only if you tick the option to save them</li>
-        <li><strong>No ads or analytics</strong> in pac-tester.html (ads appear only on this guide and the download page)</li>
+        <li><strong>No ads or analytics</strong> in pac-tester-en.html (ads appear only on this guide and the download page)</li>
       </ul>
-        <div id="licenses"><p>The tool's code is under the MIT License (<a href="https://github.com/YouheiOonuki/pac-tester" target="_blank" rel="noopener">GitHub</a>). pac-tester.html embeds this library unchanged:</p>
+        <div id="licenses"><p>The tool's code is under the MIT License (<a href="https://github.com/YouheiOonuki/pac-tester" target="_blank" rel="noopener">GitHub</a>). pac-tester-en.html embeds this library unchanged:</p>
       <div class="table-wrap">
         <table class="tbl">
           <thead><tr><th>Library</th><th>Version</th><th>License</th><th>Used for</th></tr></thead>
@@ -222,7 +222,7 @@
           </tbody>
         </table>
       </div>
-      <p>The full license text is in <a href="../THIRD_PARTY_LICENSES.txt">THIRD_PARTY_LICENSES.txt</a> and behind the <span lang="ja">ライセンス</span> button in pac-tester.html.</p></div>
+      <p>The full license text is in <a href="../THIRD_PARTY_LICENSES.txt">THIRD_PARTY_LICENSES.txt</a> and behind the License button in pac-tester-en.html.</p></div>
         <p><strong>Sample</strong>: the sample PAC is a generic example that uses only example domains (example.com, example.net, example.org, .example) and private or documentation IP addresses.</p>
       </details>
       <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=pac-tester" target="_blank" rel="noopener">Feedback and bug reports (Google Forms)</a>: the form is in Japanese, but you can write in English.</p>

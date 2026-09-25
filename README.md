@@ -7,14 +7,14 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 
 ## 本体はダウンロード版の 1 ファイル
 
-md-viewer と同じ形（オーナー決定）。**`pac-tester.html`（1 ファイルの HTML）が本体**で、インストール不要・通信なし・広告と解析なし。`index.html` は紹介とダウンロードのページで、広告とアクセス解析はここと `guide.html` だけに入れる。「ブラウザで試す」はダウンロード版と同じ `pac-tester.html` を開く。
+md-viewer と同じ形（オーナー決定）。**`pac-tester.html`（日本語）と `pac-tester-en.html`（英語）（どちらも 1 ファイルの HTML）が本体**で、インストール不要・通信なし・広告と解析なし。`index.html` は紹介とダウンロードのページで、広告とアクセス解析はここと `guide.html` だけに入れる。「ブラウザで試す」はダウンロード版と同じファイルを開く（日本語のページは `pac-tester.html`、英語のページ `en/` は `pac-tester-en.html`）。
 
 | ページ | 広告・解析 | 検索 |
 |-------|-----------|------|
 | `index.html`（紹介・ダウンロード） | AdSense・Cloudflare ビーコンあり | index |
 | `en/index.html`・`en/guide.html`（英語版） | AdSense・Cloudflare ビーコンあり | index |
 | `guide.html`（使い方） | AdSense・Cloudflare ビーコンあり | index |
-| `pac-tester.html`（本体） | **なし**（外部への通信を一切しない） | `noindex`、sitemap に載せない |
+| `pac-tester.html`・`pac-tester-en.html`（本体） | **なし**（外部への通信を一切しない） | `noindex`、sitemap に載せない |
 
 ## 機能
 
@@ -36,7 +36,15 @@ md-viewer と同じ形（オーナー決定）。**`pac-tester.html`（1 ファ�
   - isInNet のマスクの形・連続していないマスク、dnsDomainIs の先頭のドット、weekdayRange の小文字、`timeRange(22, 6)`
 - **差分モード**：旧 PAC と新 PAC を同じ URL 一覧で評価し、結果（空白をそろえた戻り値、エラー・タイムアウト）が変わった行だけに色と「変更」の印。件数を表示。「変わった行だけ」の絞り込み。CSV に旧・新の両方
 - **見本**：架空のドメイン（example.com・example.net・example.org・`.example`）とプライベート・文書用の IP アドレスだけを使った一般的な PAC・URL 一覧・ホスト表。初めて開いたとき（と、PAC を保存していないとき）に出る
-- **保存**：評価の設定を `pac-tester_settings` に保存。PAC と URL 一覧は既定では保存しない（「このブラウザに保存する」をオンにしたときだけ `pac-tester_draft`。オフに戻すと消す）。すべて try/catch
+- **保存**：評価の設定を `pac-tester_settings` に保存（日本語版と英語版で同じキー。中身は言語によらない設定と入力なので、どちらで開いても続きから使える）。PAC と URL 一覧は既定では保存しない（「このブラウザに保存する」をオンにしたときだけ `pac-tester_draft`。オフに戻すと消す）。すべて try/catch
+
+## 日本語版と英語版（2026-09-25）
+
+- ロジックは 1 つ。言語で変わる文言は **`src/messages.js`** の表（`ja`・`en`）だけに置く：`core`（チェック・構文エラー・戻り値の形・見本のコメント）、`app`（画面の動き・CSV の見出し・日時の書き方）、`sandbox`・`worker`（隔離用の枠と Worker の中のエラー）、`html`（`src/app.html` の `{{t:キー}}`。`title`・`<html lang>`・aria-label・ライセンスのダイアログを含む）、`build`（ライセンスの見出し・script の見出し）
+- `build.mjs` が言語ごとに 1 ファイルを作る。ページには、その言語の文言だけを `window.PT_MSG` として入れる。隔離用の枠には文言を置かず、評価のたびに `app.js` が postMessage で渡す
+- 英語版は、ソースのコメント（日本語）を取り除いて埋め込む（JS は acorn でコメントの位置を調べる。CSS・枠の HTML のコメントも）。日本語版はこれまでどおりそのまま
+- 文言を足すときは、`ja` と `en` の両方に同じキー・同じ差し込み（`{name}`）で書く（`tests/i18n.test.js` が確かめる）。キーが `Html` で終わる文言は HTML のまま入る
+- 英語版の「このツールについて」だけに、日本語版の紹介ページへのリンク（`<span lang="ja">日本語版</span>`）がある。英語版の中の日本語はこの 1 か所だけ（テストで確かめている）
 
 ## PAC の隔離（REVIEW C3-2 の方式）
 
@@ -61,14 +69,14 @@ md-viewer と同じ形（オーナー決定）。**`pac-tester.html`（1 ファ�
 
 ```sh
 npm ci            # package.json で固定したライブラリ（acorn）を入れる
-node build.mjs    # pac-tester.html と THIRD_PARTY_LICENSES.txt を作る
+node build.mjs    # pac-tester.html・pac-tester-en.html と THIRD_PARTY_LICENSES.txt を作る
 node --test tests/*.test.js
 ```
 
-- `build.mjs` は依存パッケージなし。`src/app.html` に `src/app.css`・`acorn/dist/acorn.js`・`src/core.js`・隔離用の枠（`window.PT_SANDBOX_HTML` という文字列。中に `pac-runtime.js` と `worker.js` を文字列で入れる）・`src/app.js` をそのまま埋め込む
+- `build.mjs` は依存パッケージなし（英語版のコメントを取り除くのに、同梱する acorn を使う）。`src/app.html` に `src/app.css`・`acorn/dist/acorn.js`・文言（`window.PT_MSG`）・`src/core.js`・隔離用の枠（`window.PT_SANDBOX_HTML` という文字列。中に `pac-runtime.js` と `worker.js` を文字列で入れる）・`src/app.js` をそのまま埋め込む
 - 埋め込む JS に `</script` があれば `<\/script` にし、`<script` があればビルドを止める。枠の HTML は JSON 文字列にし、`<` を `<` にして入れる。`src/*.js` にも「`<` のすぐ後ろに script」と書かない
-- 同じ入力なら同じ `pac-tester.html` になる。CI（`.github/workflows/test.yml`）で `npm ci && node build.mjs` のあと差分が無いことを確かめるので、**`src/` やライブラリを直したら、ビルドした `pac-tester.html` も一緒にコミットする**
-- サイズ（2026-09-24 のビルド）：`pac-tester.html` 370,426 バイト（約 370KB）。うち acorn.js 245,232 バイト。ライブラリを更新したら紹介ページの「約 370KB」と JSON-LD の `fileSize` も直す
+- 同じ入力なら同じ `pac-tester.html`・`pac-tester-en.html` になる。CI（`.github/workflows/test.yml`）で `npm ci && node build.mjs` のあと差分が無いことを確かめるので、**`src/` やライブラリを直したら、ビルドした 2 つのファイルも一緒にコミットする**
+- サイズ（2026-09-25 のビルド）：`pac-tester.html` 378,977 バイト（約 370KB）、`pac-tester-en.html` 362,110 バイト（約 354KB）。うち acorn.js 245,232 バイト。ライブラリを更新したら紹介ページ（`index.html`・`en/index.html`）の「約 ○KB」と JSON-LD の `fileSize` も直す（`tests/build.test.js` が ±10KB で確かめる）
 
 ## ライブラリとライセンス
 
@@ -84,7 +92,7 @@ node --test tests/*.test.js
 | 時期 | 確認すること | 直す場所 |
 |------|------------|---------|
 | 半年に 1 回（3 月・9 月ごろ） | acorn の新しい版、`npm audit` | `package.json` のバージョン → `npm install` → `node build.mjs` → テスト → ブラウザで見本・チェック・差分・無限ループを確認 → `pac-tester.html`・`THIRD_PARTY_LICENSES.txt`・`package-lock.json` をコミット |
-| ライブラリを更新したとき | ファイルサイズ、ライセンス | `index.html`・`en/index.html` の「約 370KB」・JSON-LD の `fileSize`、`guide.html`・`en/guide.html` の「ライセンス一覧」、この README |
+| ライブラリを更新したとき | ファイルサイズ、ライセンス | `index.html`・`en/index.html` の「約 ○KB」・JSON-LD の `fileSize`、`guide.html`・`en/guide.html` の「ライセンス一覧」、この README |
 | ブラウザの PAC の扱いが変わったとき | https のパスの扱い・ヘルパー関数の差 | `src/pac-runtime.js`・`src/core.js`・`guide.html`・`en/guide.html` |
 
 直したら、`guide.html` の「更新履歴」に日付と内容を 1 行足す。
@@ -93,11 +101,13 @@ node --test tests/*.test.js
 
 | ファイル | 役割 |
 |---------|------|
-| `pac-tester.html` | **本体**（ビルドで作る。ダウンロード版・「ブラウザで試す」の両方） |
+| `pac-tester.html` | **本体・日本語版**（ビルドで作る。ダウンロード版・「ブラウザで試す」の両方） |
+| `pac-tester-en.html` | **本体・英語版**（ビルドで作る。`en/index.html`・`en/guide.html` からリンク） |
 | `index.html` | 紹介・ダウンロードのページ |
 | `guide.html` | PAC の基本・使い方・ヘルパー関数の一覧と注意点・よくあるミス・差分モード・安全性・ライセンス一覧・よくある質問・ご利用上の注意・更新履歴 |
-| `en/index.html` / `en/guide.html` | 英語版の紹介・使い方（2026-09-24。K65）。本体 `pac-tester.html` の画面は日本語のままなので、紹介ページに画面の日本語ラベルと英語の意味の対応表を置いている。**本体のラベルを変えたら、この表も直す**。日本語版とは `hreflang` で相互に結ぶ（共通の決まりは youheioonuki.github.io の README「ツールを追加するとき」23） |
-| `src/app.html` | 本体の HTML のひな形（`{{…}}` を build.mjs が埋める） |
+| `en/index.html` / `en/guide.html` | 英語版の紹介・使い方（2026-09-24。K65）。2026-09-25 から英語版の本体 `pac-tester-en.html` にリンクする（日本語ラベルの対応表は削除）。**英語版の画面のラベルを変えたら、`en/guide.html` の本文のラベル名も直す**。日本語版とは `hreflang` で相互に結ぶ（共通の決まりは youheioonuki.github.io の README「ツールを追加するとき」23） |
+| `src/app.html` | 本体の HTML のひな形（`{{…}}` を build.mjs が埋める。文言は `{{t:キー}}`） |
+| `src/messages.js` | 文言の表（日本語 `ja`・英語 `en`。画面・チェック・見本・CSV の見出し・ライセンスの見出し） |
 | `src/app.css` | 本体の見た目（和紙風の配色、ダークモード対応） |
 | `src/app.js` | 本体の画面の制御・隔離用の枠の管理・結果の表・保存 |
 | `src/core.js` | 画面から切り離した純粋関数（URL 一覧・ホスト表・lint・パターンの包含・戻り値のチェック・差分・CSV・見本。UMD） |
@@ -115,7 +125,8 @@ node --test tests/*.test.js
 | `tests/sample.test.js` | 見本の PAC の期待値の表（Node の vm で評価）・無限ループのタイムアウト・見本が架空のドメインだけか |
 | `tests/lint.test.js` | チェック（全角スペース・return 漏れ・括弧・ルールの隠れ・パターン・戻り値の形） |
 | `tests/core.test.js` | URL 一覧・ホスト表・差分（変わらない URL は強調しない）・CSV |
-| `tests/build.test.js` | ビルドした `pac-tester.html`（外部への通信・広告が無い、CSP、隔離の方式、ライセンス） |
+| `tests/build.test.js` | ビルドした 2 つのファイル（外部への通信・広告が無い、CSP、隔離の方式、ライセンス、紹介ページのリンクとサイズ） |
+| `tests/i18n.test.js` | 日本語版と英語版（文言のキーがそろっている、英語版に日本語が残っていない、評価・チェックの結果が同じ、2 つのファイルは文言のほかは同じコード） |
 | `tests/helpers.js` | テスト用に PAC を vm で評価する関数 |
 
 テストは `node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに、`npm ci`・ビルドの差分確認・テストを自動で行う。

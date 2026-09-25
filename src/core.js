@@ -2,29 +2,43 @@
 // PAC ファイル テスター — 画面から切り離した純粋な関数（Node のテストと画面の両方で使う）
 // URL 一覧・ホスト表の読み取り、構文・ロジックのチェック（lint。acorn で構文木を作るだけで、PAC は実行しない）、
 // 戻り値の形のチェック、差分、CSV、見本
+// 文言は messages.js の core（言語ごと）。ブラウザでは build.mjs が埋め込んだ window.PT_MSG、Node では messages.js の ja を使う
+// （Node で英語を使うときは require('./core.js').forLang('en')）
 // 注意: このファイルは pac-tester.html の script 要素にそのまま入るので、「<」のすぐ後ろに script と書かない
 // ===========================
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.PacCore = factory();
-})(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) {
+    var MSG = require('./messages.js');
+    var api = factory(MSG.ja.core);
+    api.forLang = function (lang) { return factory(MSG[lang].core); };
+    module.exports = api;
+  } else root.PacCore = factory(root.PT_MSG.core);
+})(typeof self !== 'undefined' ? self : this, function (M) {
   'use strict';
+
+  // 「{name}」に値を差し込む（vars に無い名前は、そのまま残す）
+  function fmt(s, vars) {
+    return String(s).replace(/\{(\w+)\}/g, function (m, k) {
+      return vars && Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : m;
+    });
+  }
+  var SP = M.samplePac;
 
   // ---------- 見本（架空のドメイン example.com / example.net / example.org / *.example と、プライベート IP アドレスだけ） ----------
   var SAMPLE_PAC = [
-    '// 見本の PAC ファイル（架空のドメインとプライベート IP アドレスだけを使っています）',
+    '// ' + SP.head,
     'function FindProxyForURL(url, host) {',
-    '  // 1. ドットの無いホスト名（例: http://intranet/）はプロキシを通さない',
+    '  // ' + SP.c1,
     '  if (isPlainHostName(host)) {',
     '    return "DIRECT";',
     '  }',
     '',
-    '  // 2. 組織の中のドメインはプロキシを通さない',
+    '  // ' + SP.c2,
     '  if (dnsDomainIs(host, ".corp.example") || host == "corp.example") {',
     '    return "DIRECT";',
     '  }',
     '',
-    '  // 3. プライベート IP アドレス（ホスト名は「ホスト名と IP アドレスの対応表」で IP にしてから比べる）',
+    '  // ' + SP.c3,
     '  if (isInNet(host, "10.0.0.0", "255.0.0.0") ||',
     '      isInNet(host, "172.16.0.0", "255.240.0.0") ||',
     '      isInNet(host, "192.168.0.0", "255.255.0.0") ||',
@@ -32,29 +46,29 @@
     '    return "DIRECT";',
     '  }',
     '',
-    '  // 4. 動画の配信は別のプロキシへ',
+    '  // ' + SP.c4,
     '  if (shExpMatch(host, "*.video.example.net")) {',
     '    return "PROXY proxy2.example.net:8080";',
     '  }',
     '',
-    '  // 5. 更新ファイルの配布サーバー（http だけ）はプロキシを通さない',
+    '  // ' + SP.c5,
     '  if (shExpMatch(url, "http://update.example.org/*")) {',
     '    return "DIRECT";',
     '  }',
     '',
-    '  // 6. 支店のネットワーク（自分の IP アドレスで判断）は支店のプロキシへ。つながらなければ直接',
+    '  // ' + SP.c6,
     '  if (isInNet(myIpAddress(), "192.168.100.0", "255.255.255.0")) {',
     '    return "PROXY branch-proxy.example.net:8080; DIRECT";',
     '  }',
     '',
-    '  // 7. それ以外は標準のプロキシ。落ちていたら予備のプロキシ',
+    '  // ' + SP.c7,
     '  return "PROXY proxy.example.net:8080; PROXY proxy-backup.example.net:8080";',
     '}',
     ''
   ].join('\n');
 
   var SAMPLE_URLS = [
-    '# 1 行に 1 つの URL（# で始まる行はメモ）',
+    '# ' + M.sampleUrlsHead,
     'http://intranet/',
     'https://portal.corp.example/login',
     'https://files.example.com/share/report.xlsx',
@@ -69,7 +83,7 @@
   ].join('\n');
 
   var SAMPLE_HOSTS = [
-    '# ホスト名 と IP アドレス（1 行に 1 組。hosts ファイルと同じ「IP ホスト名」の順でも可）',
+    '# ' + M.sampleHostsHead,
     'files.example.com 192.168.10.20',
     'app.example.org 172.16.5.4',
     'www.example.com 203.0.113.10',
@@ -112,7 +126,7 @@
           ? u.protocol + '//' + u.host + '/'
           : u.href;
       } catch (e) {
-        item.error = 'URL として読めません';
+        item.error = M.urlUnreadable;
       }
       out.push(item);
     });
@@ -127,11 +141,11 @@
       var line = raw.replace(/#.*$/, '').trim();
       if (!line) return;
       var parts = line.split(/[\s,=\t]+/).filter(Boolean);
-      if (parts.length < 2) { errors.push({ line: i + 1, message: 'ホスト名と IP アドレスの 2 つを書いてください' }); return; }
+      if (parts.length < 2) { errors.push({ line: i + 1, message: M.hostNeedTwo }); return; }
       var ip, names;
       if (isIPv4(parts[0])) { ip = parts[0]; names = parts.slice(1); }
       else if (isIPv4(parts[1])) { ip = parts[1]; names = [parts[0]]; }
-      else { errors.push({ line: i + 1, message: 'IPv4 アドレス（例: 192.168.0.10）が見つかりません' }); return; }
+      else { errors.push({ line: i + 1, message: M.hostNoIp }); return; }
       names.forEach(function (n) { hosts[n.toLowerCase()] = ip; });
     });
     return { hosts: hosts, errors: errors };
@@ -140,25 +154,25 @@
   // ---------- 戻り値の形 ----------
   var PROXY_ITEM = /^(PROXY|HTTP|HTTPS|SOCKS|SOCKS4|SOCKS5|QUIC)\s+(\[[0-9A-Fa-f:.]+\]|[^\s:;\[\]]+)(:(\d{1,5}))?$/i;
 
-  // 戻り値の文字列を調べる。問題がなければ null、あれば日本語の説明
+  // 戻り値の文字列を調べる。問題がなければ null、あれば説明（messages.js の言語）
   function checkReturnValue(s) {
-    if (typeof s !== 'string') return '文字列ではありません';
+    if (typeof s !== 'string') return M.rvNotString;
     var t = s.trim();
-    if (!t) return '空の文字列です（ブラウザは DIRECT として扱うことが多いですが、意図どおりか確かめてください）';
-    if (/[\u3000\uFF01-\uFF5E]/.test(s)) return '全角文字が入っています';
-    if (t.indexOf(',') >= 0 && t.indexOf(';') < 0 && /(PROXY|DIRECT|SOCKS|HTTPS?)\b.*,/i.test(t)) return '区切りに「,」が使われています（正しくは「;」）';
+    if (!t) return M.rvEmpty;
+    if (/[\u3000\uFF01-\uFF5E]/.test(s)) return M.rvWide;
+    if (t.indexOf(',') >= 0 && t.indexOf(';') < 0 && /(PROXY|DIRECT|SOCKS|HTTPS?)\b.*,/i.test(t)) return M.rvComma;
     var items = t.split(';').map(function (x) { return x.trim(); }).filter(function (x, i, a) { return x || i < a.length - 1; });
     for (var i = 0; i < items.length; i++) {
       var it = items[i];
-      if (!it) return '「;」が続いています（空の項目があります）';
+      if (!it) return M.rvEmptyItem;
       if (/^DIRECT$/i.test(it)) continue;
       var m = PROXY_ITEM.exec(it);
       if (!m) {
-        if (/^(PROXY|HTTP|HTTPS|SOCKS[45]?)$/i.test(it)) return '「' + it + '」の後ろにホスト名:ポートがありません';
-        if (/^(PROXY|HTTPS?|SOCKS[45]?):/i.test(it)) return '「' + it + '」: 種類とホスト名の間は空白で区切ります（例: PROXY proxy.example.com:8080）';
-        return '「' + it + '」は DIRECT・PROXY ホスト:ポート・SOCKS ホスト:ポート などの形になっていません';
+        if (/^(PROXY|HTTP|HTTPS|SOCKS[45]?)$/i.test(it)) return fmt(M.rvNoHostPort, { item: it });
+        if (/^(PROXY|HTTPS?|SOCKS[45]?):/i.test(it)) return fmt(M.rvColon, { item: it });
+        return fmt(M.rvBadForm, { item: it });
       }
-      if (m[4] !== undefined && (Number(m[4]) < 1 || Number(m[4]) > 65535)) return '「' + it + '」のポート番号が 1〜65535 の範囲外です';
+      if (m[4] !== undefined && (Number(m[4]) < 1 || Number(m[4]) > 65535)) return fmt(M.rvPortRange, { item: it });
     }
     return null;
   }
@@ -185,8 +199,8 @@
   // 結果を 1 つの文字列にする（表示・差分・CSV 用）
   function resultText(r) {
     if (!r) return '';
-    if (!r.ok) return r.timeout ? '（タイムアウト）' : '（エラー）' + (r.error || '');
-    if (r.valueType !== 'string') return '（' + r.valueType + '）' + r.value;
+    if (!r.ok) return r.timeout ? M.resTimeout : M.resError + (r.error || '');
+    if (r.valueType !== 'string') return fmt(M.resType, { type: r.valueType }) + r.value;
     return normalizeValue(r.value);
   }
 
@@ -348,28 +362,26 @@
     return { line: lo + 1, col: pos - starts[lo] + 1 };
   }
 
-  // ---------- 構文エラーの日本語 ----------
+  // ---------- 構文エラーの説明（acorn の英語のメッセージを、messages.js の文言にする） ----------
   function translateSyntaxError(msg, atEnd) {
     var m = String(msg).replace(/\s*\(\d+:\d+\)\s*$/, '');
     var r;
     if (/^Unexpected token/.test(m)) {
-      return atEnd
-        ? 'コードが途中で終わっています（閉じ括弧「}」「)」が足りない可能性があります）'
-        : 'ここで予期しない記号があります（括弧・引用符・カンマ・セミコロン・演算子の過不足を確かめてください）';
+      return atEnd ? M.synEnd : M.synUnexpected;
     }
-    if (/^Unterminated string constant/.test(m)) return '文字列の引用符が閉じていません（" と \' の対応を確かめてください）';
-    if (/^Unterminated comment/.test(m)) return 'コメント（/* … */）が閉じていません';
-    if (/^Unterminated template/.test(m)) return 'テンプレート文字列（` … `）が閉じていません';
-    if (/^Unterminated regular expression/.test(m)) return '正規表現（/ … /）が閉じていません';
-    if ((r = /^Unexpected character '(.+)'/.exec(m))) return '使えない文字「' + r[1] + '」があります（全角の記号や、和文の引用符ではありませんか）';
-    if ((r = /^Unexpected keyword '(.+)'/.exec(m))) return 'ここに「' + r[1] + '」は書けません';
-    if (/^'return' outside of function/.test(m)) return 'return が関数の外にあります（{ } の対応を確かめてください）';
-    if ((r = /^Identifier '(.+)' has already been declared/.exec(m))) return '「' + r[1] + '」が 2 回宣言されています';
-    if (/^Assigning to rvalue/.test(m)) return '代入できない場所に「=」があります（比べるときは == か === です）';
-    if (/^Invalid regular expression/.test(m)) return '正規表現の書き方が正しくありません';
-    if (/^Octal literal in strict mode/.test(m)) return '0 で始まる数字は書けません';
-    if (/^Unexpected reserved word/.test(m)) return '予約語はここに書けません';
-    return '構文エラー（' + m + '）';
+    if (/^Unterminated string constant/.test(m)) return M.synString;
+    if (/^Unterminated comment/.test(m)) return M.synComment;
+    if (/^Unterminated template/.test(m)) return M.synTemplate;
+    if (/^Unterminated regular expression/.test(m)) return M.synRegex;
+    if ((r = /^Unexpected character '(.+)'/.exec(m))) return fmt(M.synChar, { ch: r[1] });
+    if ((r = /^Unexpected keyword '(.+)'/.exec(m))) return fmt(M.synKeyword, { word: r[1] });
+    if (/^'return' outside of function/.test(m)) return M.synReturnOutside;
+    if ((r = /^Identifier '(.+)' has already been declared/.exec(m))) return fmt(M.synDup, { name: r[1] });
+    if (/^Assigning to rvalue/.test(m)) return M.synAssign;
+    if (/^Invalid regular expression/.test(m)) return M.synBadRegex;
+    if (/^Octal literal in strict mode/.test(m)) return M.synOctal;
+    if (/^Unexpected reserved word/.test(m)) return M.synReserved;
+    return fmt(M.synOther, { msg: m });
   }
 
   // ---------- 構文木の読み取り ----------
@@ -542,7 +554,7 @@
     function nodeLoc(n) { return { line: n.loc.start.line, col: n.loc.start.column + 1 }; }
 
     if (!code.trim()) {
-      add('error', null, 'PAC が空です', 'empty');
+      add('error', null, M.empty, 'empty');
       return finish();
     }
 
@@ -563,23 +575,23 @@
       var what = describeWide(chunk);
       wideCount++;
       if (reg && (reg.type === 'string' || reg.type === 'regex')) {
-        add('warning', pos, '文字列の中に' + what + 'があります「' + chunk.slice(0, 12) + '」（ホスト名や戻り値に全角文字は使えません）', 'wide-string');
+        add('warning', pos, fmt(M.wideString, { what: what, chunk: chunk.slice(0, 12) }), 'wide-string');
       } else {
-        add('error', pos, 'コードの中に' + what + 'があります「' + visible(chunk.slice(0, 12)) + '」（半角に直してください）', 'wide-code');
+        add('error', pos, fmt(M.wideCode, { what: what, chunk: visible(chunk.slice(0, 12)) }), 'wide-code');
       }
     }
 
     // 2. 括弧と引用符の対応
     scan.regions.forEach(function (r) {
-      if (r.unterminated && r.type === 'string') add('error', r.start, '引用符 ' + r.quote + ' が閉じていません', 'quote');
-      if (r.unterminated && r.type === 'comment') add('error', r.start, 'コメント（/* … */）が閉じていません', 'comment');
+      if (r.unterminated && r.type === 'string') add('error', r.start, fmt(M.quoteOpen, { q: r.quote }), 'quote');
+      if (r.unterminated && r.type === 'comment') add('error', r.start, M.synComment, 'comment');
     });
     scan.bracketIssues.slice(0, 5).forEach(function (b) {
-      if (b.kind === 'extra') add('error', b.pos, '閉じ括弧「' + b.ch + '」に対応する開き括弧がありません', 'bracket');
+      if (b.kind === 'extra') add('error', b.pos, fmt(M.bracketExtra, { ch: b.ch }), 'bracket');
       else if (b.kind === 'mismatch') {
         var o = posToLoc(starts, b.open.pos);
-        add('error', b.pos, '括弧の対応がずれています: ' + o.line + ' 行目の「' + b.open.ch + '」を「' + b.ch + '」で閉じています', 'bracket');
-      } else add('error', b.pos, '開き括弧「' + b.ch + '」が閉じていません', 'bracket');
+        add('error', b.pos, fmt(M.bracketMismatch, { line: o.line, open: b.open.ch, ch: b.ch }), 'bracket');
+      } else add('error', b.pos, fmt(M.bracketOpen, { ch: b.ch }), 'bracket');
     });
 
     // 3. 構文（acorn）
@@ -596,38 +608,38 @@
     // 4. FindProxyForURL
     var entries = findEntry(ast);
     if (!entries.length) {
-      add('error', null, 'FindProxyForURL という関数がありません（名前の大文字・小文字も確かめてください）', 'no-entry');
+      add('error', null, M.noEntry, 'no-entry');
       var near = [];
       walk(ast, function (n) {
         if (n.type === 'FunctionDeclaration' && n.id && /^findproxyforurl$/i.test(n.id.name)) near.push(n);
       }, true, true);
-      near.forEach(function (n) { add('error', nodeLoc(n), '「' + n.id.name + '」は名前が違います（正しくは FindProxyForURL）', 'no-entry'); });
+      near.forEach(function (n) { add('error', nodeLoc(n), fmt(M.wrongName, { name: n.id.name }), 'no-entry'); });
     }
     if (entries.length > 1) {
-      add('warning', nodeLoc(entries[1]), 'FindProxyForURL が ' + entries.length + ' つあります（最後に書いたものが使われます）', 'dup-entry');
+      add('warning', nodeLoc(entries[1]), fmt(M.dupEntry, { n: entries.length }), 'dup-entry');
     }
     var fn = entries[entries.length - 1];
     var params = {};
     if (fn) {
-      if (fn.params.length !== 2) add('warning', nodeLoc(fn), 'FindProxyForURL の引数は (url, host) の 2 つです（今は ' + fn.params.length + ' つ）', 'params');
+      if (fn.params.length !== 2) add('warning', nodeLoc(fn), fmt(M.params, { n: fn.params.length }), 'params');
       if (fn.params[0] && fn.params[0].type === 'Identifier') params.url = fn.params[0].name;
       if (fn.params[1] && fn.params[1].type === 'Identifier') params.host = fn.params[1].name;
-      if (fn.async || fn.generator) add('error', nodeLoc(fn), 'FindProxyForURL を async や function* にはできません', 'params');
+      if (fn.async || fn.generator) add('error', nodeLoc(fn), M.asyncFn, 'params');
 
       // 5. 最後の return
       var body = fn.body;
       if (body.type === 'BlockStatement' && !terminates(body)) {
-        add('warning', { line: body.loc.end.line, col: body.loc.end.column }, '関数の最後まで来たときの return がありません（どの条件にも当てはまらない URL で、戻り値が undefined になります。最後に return "DIRECT"; などを書いてください）', 'no-return');
+        add('warning', { line: body.loc.end.line, col: body.loc.end.column }, M.noReturn, 'no-return');
       }
 
       // 6. return の値の形
       walk(body, function (n) {
         if (n.type !== 'ReturnStatement') return;
-        if (!n.argument) { add('warning', nodeLoc(n), '値の無い return があります（戻り値が undefined になります）', 'return-value'); return; }
+        if (!n.argument) { add('warning', nodeLoc(n), M.emptyReturn, 'return-value'); return; }
         var v = strLit(n.argument);
         if (v !== null) {
           var bad = checkReturnValue(v);
-          if (bad) add('warning', nodeLoc(n), '戻り値 "' + v + '": ' + bad, 'return-value');
+          if (bad) add('warning', nodeLoc(n), fmt(M.badReturn, { v: v, why: bad }), 'return-value');
         }
       }, false, true);
     }
@@ -635,7 +647,7 @@
     // 7. ヘルパー関数の呼び方と、shExpMatch のパターン
     walk(ast, function (n) {
       if (n.type === 'FunctionDeclaration' && n.id && n.id.name !== 'FindProxyForURL' && (HELPER_ARGS[n.id.name] !== undefined || /^(weekdayRange|dateRange|timeRange|alert)$/.test(n.id.name))) {
-        add('info', nodeLoc(n), '標準のヘルパー関数「' + n.id.name + '」を自分で定義しています（こちらの定義が使われます）', 'override');
+        add('info', nodeLoc(n), fmt(M.override, { name: n.id.name }), 'override');
       }
       if (n.type !== 'CallExpression' || n.callee.type !== 'Identifier') return;
       var name = n.callee.name;
@@ -649,37 +661,37 @@
         notes.forEach(function (x) { add(x.severity, nodeLoc(n), 'shExpMatch(' + (role || '…') + ', "' + pat + '"): ' + x.message, 'pattern'); });
       }
       if (HELPER_ARGS[name] !== undefined && args.length !== HELPER_ARGS[name] && !(name === 'shExpMatch' && args.length === 2)) {
-        add('warning', nodeLoc(n), name + ' の引数は ' + HELPER_ARGS[name] + ' つです（今は ' + args.length + ' つ）', 'args');
+        add('warning', nodeLoc(n), fmt(M.argCount, { name: name, n: HELPER_ARGS[name], m: args.length }), 'args');
       }
       if (name === 'isInNet' && args.length === 3) {
         [1, 2].forEach(function (k) {
           var v = strLit(args[k]);
-          if (v !== null && !isIPv4(v)) add('warning', nodeLoc(n), 'isInNet の' + (k === 1 ? '第 2 引数（ネットワーク）' : '第 3 引数（マスク）') + ' "' + v + '" が IPv4 アドレスの形になっていません（例: "255.255.0.0"。"/16" の形は使えません）', 'args');
+          if (v !== null && !isIPv4(v)) add('warning', nodeLoc(n), fmt(M.isInNetArg, { which: k === 1 ? M.argNet : M.argMask, v: v }), 'args');
         });
         var net = strLit(args[1]), mask = strLit(args[2]);
         if (net !== null && mask !== null && isIPv4(mask) && !isContiguousMask(mask)) {
-          add('warning', nodeLoc(n), 'isInNet のマスク "' + mask + '" は、1 が左から連続していません（ネットワークとマスクを逆に書いていませんか）', 'args');
+          add('warning', nodeLoc(n), fmt(M.maskNonContig, { mask: mask }), 'args');
         }
       }
       if (name === 'dnsDomainIs' && args.length === 2) {
         var dom = strLit(args[1]);
         if (dom !== null && dom.charAt(0) !== '.' && dom.indexOf('.') > 0) {
-          add('info', nodeLoc(n), 'dnsDomainIs(…, "' + dom + '") は、先頭にドットが無いので「bad' + dom + '」のようなホストにも当てはまります（サブドメインだけなら ".' + dom + '"）', 'domain');
+          add('info', nodeLoc(n), fmt(M.domainNoDot, { dom: dom }), 'domain');
         }
-        if (dom !== null && /[*?]/.test(dom)) add('warning', nodeLoc(n), 'dnsDomainIs では * や ? は使えません（shExpMatch を使います）', 'domain');
+        if (dom !== null && /[*?]/.test(dom)) add('warning', nodeLoc(n), M.domainWild, 'domain');
       }
       if (name === 'weekdayRange') {
         args.forEach(function (a) {
           var v = strLit(a);
           if (v !== null && v !== 'GMT' && WEEKDAYS.indexOf(v) < 0) {
-            add('warning', nodeLoc(n), 'weekdayRange の "' + v + '" は使えません（"MON" のように大文字の英語 3 文字。小文字は多くのブラウザで false になります）', 'args');
+            add('warning', nodeLoc(n), fmt(M.weekday, { v: v }), 'args');
           }
         });
       }
       if (name === 'timeRange' && args.length >= 2) {
         var nums = args.filter(function (a) { return strLit(a) !== 'GMT'; });
         if (nums.length === 2 && nums[0].type === 'Literal' && nums[1].type === 'Literal' && Number(nums[0].value) > Number(nums[1].value)) {
-          add('warning', nodeLoc(n), 'timeRange(' + nums[0].value + ', ' + nums[1].value + ') は、多くのブラウザで常に false です（時だけの指定は日をまたげません。timeRange(' + nums[0].value + ', 0, ' + nums[1].value + ', 0) の形なら日をまたげます）', 'args');
+          add('warning', nodeLoc(n), fmt(M.timeRange, { a: nums[0].value, b: nums[1].value }), 'args');
         }
       }
     }, true, true);
@@ -700,12 +712,12 @@
     return s.replace(/\u3000/g, '□').replace(/[\u00A0\u200B-\u200D\u2060\uFEFF]/g, '▯');
   }
   function describeWide(s) {
-    if (/\u3000/.test(s)) return '全角スペース';
-    if (/[\u200B-\u200D\u2060\uFEFF]/.test(s)) return '目に見えない文字（ゼロ幅スペースなど）';
-    if (/\u00A0/.test(s)) return '特殊な空白（ノーブレークスペース）';
-    if (/[\u2018\u2019\u201C\u201D\u300C\u300D]/.test(s)) return '和文の引用符';
-    if (/[\uFF01-\uFF5E]/.test(s)) return '全角の英数字・記号';
-    return '全角文字';
+    if (/\u3000/.test(s)) return M.wFwSpace;
+    if (/[\u200B-\u200D\u2060\uFEFF]/.test(s)) return M.wZeroWidth;
+    if (/\u00A0/.test(s)) return M.wNbsp;
+    if (/[\u2018\u2019\u201C\u201D\u300C\u300D]/.test(s)) return M.wQuote;
+    if (/[\uFF01-\uFF5E]/.test(s)) return M.wFwAlnum;
+    return M.wOther;
   }
   function isContiguousMask(mask) {
     var b = mask.split('.').map(Number);
@@ -720,23 +732,23 @@
     var baseRole = role ? role.replace(/\.to(Lower|Upper)Case$/, '') : role;
     var isHost = baseRole === 'host';
     var isUrl = baseRole === 'url';
-    if (/^\s|\s$/.test(p)) notes.push({ severity: 'warning', message: '前後に空白があります（空白も文字として比べます）' });
-    if (/[\u3000\uFF01-\uFF5E]/.test(p)) notes.push({ severity: 'warning', message: '全角文字が入っています' });
-    if (/[\[\]+^$|\\(){}]/.test(p)) notes.push({ severity: 'warning', message: 'shExpMatch で使える記号は * と ? だけです（正規表現ではありません）' });
+    if (/^\s|\s$/.test(p)) notes.push({ severity: 'warning', message: M.pSpace });
+    if (/[\u3000\uFF01-\uFF5E]/.test(p)) notes.push({ severity: 'warning', message: M.pWide });
+    if (/[\[\]+^$|\\(){}]/.test(p)) notes.push({ severity: 'warning', message: M.pRegex });
     if (isHost) {
-      if (/^[a-z][a-z0-9+.-]*:\/\//i.test(p) || p.indexOf('://') >= 0) notes.push({ severity: 'warning', message: 'host にはスキーム（http:// など）は含まれません。URL 全体と比べるなら shExpMatch(url, …) にします' });
-      else if (p.indexOf('/') >= 0) notes.push({ severity: 'warning', message: 'host にはパス（/ 以降）は含まれません' });
-      if (/[A-Z]/.test(p) && role === 'host') notes.push({ severity: 'warning', message: '大文字が入っています（ブラウザが渡すホスト名は小文字なので、当てはまりません）' });
-      if (/:\d+\*?$/.test(p) && p.indexOf('://') < 0) notes.push({ severity: 'warning', message: 'host にはポート番号は含まれません' });
+      if (/^[a-z][a-z0-9+.-]*:\/\//i.test(p) || p.indexOf('://') >= 0) notes.push({ severity: 'warning', message: M.pHostScheme });
+      else if (p.indexOf('/') >= 0) notes.push({ severity: 'warning', message: M.pHostPath });
+      if (/[A-Z]/.test(p) && role === 'host') notes.push({ severity: 'warning', message: M.pHostUpper });
+      if (/:\d+\*?$/.test(p) && p.indexOf('://') < 0) notes.push({ severity: 'warning', message: M.pHostPort });
       if (!/[*?\/]/.test(p)) {
-        if (p.charAt(0) === '.') notes.push({ severity: 'warning', message: '* がありません。「' + p + '」という名前そのものとしか一致しません（サブドメインすべてなら "*' + p + '"）' });
-        else notes.push({ severity: 'info', message: '* も ? も無いので、ホスト名が完全に同じときだけ一致します' + (p.split('.').length === 2 ? '（サブドメインも含めるなら "*.' + p + '" も書きます）' : '') });
+        if (p.charAt(0) === '.') notes.push({ severity: 'warning', message: fmt(M.pNoStarDot, { p: p }) });
+        else notes.push({ severity: 'info', message: M.pExact + (p.split('.').length === 2 ? fmt(M.pExactSub, { p: p }) : '') });
       }
     }
     if (isUrl) {
-      if (!/^[*?]/.test(p) && !/^[a-z][a-z0-9+.-]*:\/\//i.test(p)) notes.push({ severity: 'warning', message: 'url はスキーム（http:// など）から始まります。先頭を "*" か "http://" にしてください' });
-      else if (/^[a-z][a-z0-9+.-]*:\/\/[^\/*]+$/i.test(p)) notes.push({ severity: 'warning', message: 'url は最後に「/」やパスが付くので、このパターンとは一致しません（末尾に "/*" を付けてください）' });
-      if (/^https:\/\/[^\/]*\/./i.test(p) && !/^https:\/\/[^\/]*\/\*$/i.test(p)) notes.push({ severity: 'info', message: 'Chrome・Edge などは https の URL のパスとクエリを PAC に渡さない（https://ホスト/ だけ）ので、パスを使った判定は効きません' });
+      if (!/^[*?]/.test(p) && !/^[a-z][a-z0-9+.-]*:\/\//i.test(p)) notes.push({ severity: 'warning', message: M.pUrlScheme });
+      else if (/^[a-z][a-z0-9+.-]*:\/\/[^\/*]+$/i.test(p)) notes.push({ severity: 'warning', message: M.pUrlSlash });
+      if (/^https:\/\/[^\/]*\/./i.test(p) && !/^https:\/\/[^\/]*\/\*$/i.test(p)) notes.push({ severity: 'info', message: M.pHttpsPath });
     }
     return notes;
   }
@@ -770,8 +782,7 @@
               var aShown = a.shown || 'shExpMatch(' + a.role + ', "' + a.pattern + '")';
               var cShown = c.shown || 'shExpMatch(' + c.role + ', "' + c.pattern + '")';
               add(same ? 'info' : 'warning', { line: c.node.loc.start.line, col: c.node.loc.start.column + 1 },
-                'このルール ' + cShown + ' には到達しません。' + a.node.loc.start.line + ' 行目の ' + aShown + ' が先にすべて当てはまります' +
-                (same ? '（戻り値が同じなので結果は変わりません）' : '（順番を入れ替えるか、上のパターンを狭めてください）'), 'shadow');
+                fmt(M.shadow, { c: cShown, line: a.node.loc.start.line, a: aShown }) + (same ? M.shadowSame : M.shadowDiff), 'shadow');
               break;
             }
           }
@@ -788,6 +799,7 @@
     SAMPLE_URLS: SAMPLE_URLS,
     SAMPLE_HOSTS: SAMPLE_HOSTS,
     SAMPLE_MY_IP: SAMPLE_MY_IP,
+    fmt: fmt,
     isIPv4: isIPv4,
     parseUrlList: parseUrlList,
     parseHostTable: parseHostTable,

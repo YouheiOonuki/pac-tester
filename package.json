@@ -2,7 +2,7 @@
   "name": "pac-tester",
   "version": "1.0.0",
   "private": true,
-  "description": "PAC ファイル テスター（1 ファイルの HTML にビルドする）",
+  "description": "PAC ファイル テスター（日本語版・英語版の 1 ファイルの HTML にビルドする）",
   "license": "MIT",
   "scripts": {
     "build": "node build.mjs",

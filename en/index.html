@@ -33,8 +33,8 @@
     "description": "Offline PAC file tester: run FindProxyForURL against a list of URLs, lint the PAC file and compare two versions. One HTML file with no network access.",
     "url": "https://yorozu-craft.com/pac-tester/en/",
     "applicationCategory": "DeveloperApplication",
-    "downloadUrl": "https://yorozu-craft.com/pac-tester/pac-tester.html",
-    "fileSize": "370KB",
+    "downloadUrl": "https://yorozu-craft.com/pac-tester/pac-tester-en.html",
+    "fileSize": "354KB",
     "softwareRequirements": "A current browser such as Microsoft Edge, Google Chrome, Firefox or Safari",
     "operatingSystem": "All",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
@@ -62,12 +62,12 @@
 
     <section class="card hero" aria-labelledby="h-get">
       <h2 id="h-get">Download (free)</h2>
-      <p>The whole tool is <strong>one file, pac-tester.html</strong>. <strong>Nothing to install and no network access</strong>, so it works on locked-down work PCs and on machines with no internet connection.</p>
+      <p>The whole tool is <strong>one file, pac-tester-en.html</strong>. <strong>Nothing to install and no network access</strong>, so it works on locked-down work PCs and on machines with no internet connection.</p>
       <div class="cta">
-        <a class="btn btn-big" href="../pac-tester.html" download="pac-tester.html">Download pac-tester.html (about 370 KB)</a>
-        <a class="btn btn-sub" href="../pac-tester.html" target="_blank" rel="noopener">Open in the browser</a>
+        <a class="btn btn-big" href="../pac-tester-en.html" download="pac-tester-en.html">Download pac-tester-en.html (about 354 KB)</a>
+        <a class="btn btn-sub" href="../pac-tester-en.html" target="_blank" rel="noopener">Open in the browser</a>
       </div>
-      <p class="small"><strong>The tool's screen is in Japanese.</strong> The <a href="#ui">key labels are below</a>.</p>
+      <p class="small">A <a href="../" hreflang="ja">Japanese version</a> of the tool is also available.</p>
     </section>
 
     <section class="card content" aria-labelledby="h-feat">
@@ -110,63 +110,11 @@
     <section class="card content" id="ui" aria-labelledby="h-steps">
       <h2 id="h-steps">How to use it</h2>
       <ol>
-        <li>Download pac-tester.html and double-click it</li>
+        <li>Download pac-tester-en.html and double-click it</li>
         <li>Paste your PAC into the left-hand box, or drag and drop a .pac file onto the page</li>
         <li>List the URLs to test in the right-hand box, one per line. Results and check messages update as you type</li>
       </ol>
-      <div class="table-wrap">
-        <table class="tbl">
-          <thead><tr><th>Label on screen</th><th>Meaning</th></tr></thead>
-          <tbody>
-            <tr><td lang="ja">PAC ファイル</td><td>PAC file (paste here)</td></tr>
-            <tr><td lang="ja">テストする URL</td><td>URLs to test</td></tr>
-            <tr><td lang="ja">結果</td><td>Results</td></tr>
-            <tr><td lang="ja">構文・ロジックのチェック</td><td>Syntax and logic checks</td></tr>
-            <tr><td lang="ja">評価の設定</td><td>Evaluation settings (click to expand)</td></tr>
-            <tr><td lang="ja">差分モード</td><td>Diff mode</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <details class="more">
-        <summary>Reading the Japanese screen (all labels)</summary>
-        <div class="table-wrap">
-        <table class="tbl">
-          <thead><tr><th>Label on screen</th><th>Meaning</th></tr></thead>
-          <tbody>
-            <tr><td lang="ja">評価する</td><td>Evaluate now (Ctrl+Enter). Normally not needed: it re-evaluates 400 ms after you stop typing</td></tr>
-            <tr><td lang="ja">差分モード</td><td>Diff mode</td></tr>
-            <tr><td lang="ja">見本</td><td>Load the sample PAC, URLs and settings</td></tr>
-            <tr><td lang="ja">ライセンス</td><td>About this tool and the bundled library's license</td></tr>
-            <tr><td lang="ja">PAC ファイル</td><td>PAC file (paste here)</td></tr>
-            <tr><td lang="ja">開く</td><td>Open a file</td></tr>
-            <tr><td lang="ja">旧 PAC（いまの版）／新 PAC（変更後）</td><td>Old PAC (current) / New PAC (changed), in diff mode</td></tr>
-            <tr><td lang="ja">旧を写す</td><td>Copy the old PAC into the new box</td></tr>
-            <tr><td lang="ja">PAC と URL 一覧も、このブラウザに保存する</td><td>Also save the PAC and URL list in this browser (off by default)</td></tr>
-            <tr><td lang="ja">構文・ロジックのチェック</td><td>Syntax and logic checks. Click a message to jump to its line</td></tr>
-            <tr><td lang="ja">エラー／注意／参考</td><td>Error / Warning / Info</td></tr>
-            <tr><td lang="ja">問題は見つかりませんでした</td><td>No problems found</td></tr>
-            <tr><td lang="ja">shExpMatch のパターン一覧</td><td>List of every shExpMatch pattern in the file</td></tr>
-            <tr><td lang="ja">テストする URL</td><td>URLs to test (one per line; lines starting with # are comments)</td></tr>
-            <tr><td lang="ja">.txt を開く／.txt で保存</td><td>Open / save the URL list as a .txt file</td></tr>
-            <tr><td lang="ja">評価の設定</td><td>Evaluation settings (click to expand)</td></tr>
-            <tr><td lang="ja">ホスト名と IP アドレスの対応表</td><td>Host-to-IP table, used instead of DNS</td></tr>
-            <tr><td lang="ja">myIpAddress() が返す IP アドレス</td><td>IP address returned by myIpAddress()</td></tr>
-            <tr><td lang="ja">評価に使う日時／いまの日時を使う</td><td>Date and time the script sees / use the current date and time</td></tr>
-            <tr><td lang="ja">UTC との時差</td><td>UTC offset</td></tr>
-            <tr><td lang="ja">https の URL は、パスとクエリを除いて渡す</td><td>Strip the path and query from https URLs (on by default, as Chrome and Edge do)</td></tr>
-            <tr><td lang="ja">結果</td><td>Results</td></tr>
-            <tr><td lang="ja">URL・結果で絞り込み</td><td>Filter by URL or result</td></tr>
-            <tr><td lang="ja">変わった行だけ／エラー・注意だけ</td><td>Changed rows only (diff mode) / Errors and warnings only</td></tr>
-            <tr><td lang="ja">CSV で保存</td><td>Save as CSV</td></tr>
-            <tr><td lang="ja">タイムアウト／エラー／変更</td><td>Timeout / Error / Changed</td></tr>
-            <tr><td lang="ja">undefined（戻り値なし）</td><td>undefined (the function returned nothing)</td></tr>
-            <tr><td lang="ja">PAC に渡す URL</td><td>The URL actually passed to FindProxyForURL (shown when the https path was stripped)</td></tr>
-          </tbody>
-        </table>
-      </div>
-        <p class="small">Check messages and CSV column headings are also in Japanese. Each message shows its line number and severity.</p>
-        <p class="small">On first launch it shows a sample PAC, URL list and host table that use only example domains (the sample's comments are in Japanese).</p>
-      </details>
+      <p class="small">On first launch it shows a sample PAC, URL list and host table that use only example domains.</p>
     </section>
 
     <section class="card content" aria-labelledby="h-qa">
@@ -197,15 +145,15 @@
 
     <section class="card content" aria-labelledby="h-safe">
       <h2 id="h-safe">Your PAC stays on your machine and runs in a sandbox</h2>
-      <p>pac-tester.html <strong>never connects to any server</strong>. The PAC runs in a <strong>Worker inside a sandboxed iframe</strong>, separate from the page.</p>
+      <p>pac-tester-en.html <strong>never connects to any server</strong>. The PAC runs in a <strong>Worker inside a sandboxed iframe</strong>, separate from the page.</p>
       <details class="more">
         <summary>More on safety</summary>
         <ul>
           <li>Its Content-Security-Policy blocks network requests as well</li>
-          <li>pac-tester.html includes everything it needs, including the parser library (acorn). PAC files with internal host names are safe to paste</li>
+          <li>pac-tester-en.html includes everything it needs, including the parser library (acorn). PAC files with internal host names are safe to paste</li>
           <li>A PAC is a program, so it runs separately from the page. It can't touch the page, its storage, or the network</li>
           <li>By default your PAC isn't saved in the browser either (you can opt in)</li>
-          <li>pac-tester.html contains no ads and no analytics (ads appear only on this page and the guide)</li>
+          <li>pac-tester-en.html contains no ads and no analytics (ads appear only on this page and the guide)</li>
         </ul>
       </details>
     </section>
