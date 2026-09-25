@@ -218,7 +218,7 @@
       var s1, s2;
       if (argc === 4) { s1 = n[0] * 3600 + n[1] * 60; s2 = n[2] * 3600 + n[3] * 60 + 59; }
       else if (argc === 6) { s1 = n[0] * 3600 + n[1] * 60 + n[2]; s2 = n[3] * 3600 + n[4] * 60 + n[5]; }
-      else throw new Error('timeRange: 引数の数が正しくありません（1・2・4・6 個）');
+      else throw new Error((cfg.msg && cfg.msg.timeRangeArgs) || 'timeRange: wrong number of arguments (1, 2, 4 or 6)');
       if (s1 <= s2) return s1 <= sec && sec <= s2;
       return sec <= s2 || sec >= s1;                    // 22:00〜06:00 のような、日をまたぐ指定
     };

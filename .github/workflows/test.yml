@@ -1,5 +1,5 @@
 # テストの自動実行（yorozu-craft の README「ツールを追加するとき」）。push と PR のたびに走らせる
-# pac-tester.html はビルドしたものをコミットしているので、ビルドし直して差分が無いことも確かめる
+# pac-tester.html・pac-tester-en.html はビルドしたものをコミットしているので、ビルドし直して差分が無いことも確かめる
 name: test
 
 on:
@@ -18,8 +18,9 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - name: pac-tester.html がソースから作り直したものと同じか
+      - name: pac-tester.html・pac-tester-en.html がソースから作り直したものと同じか
         run: |
           node build.mjs
-          git diff --exit-code -- pac-tester.html THIRD_PARTY_LICENSES.txt
+          git diff --exit-code -- pac-tester.html pac-tester-en.html THIRD_PARTY_LICENSES.txt
+          test -z "$(git status --porcelain -- pac-tester-en.html)"
       - run: node --test tests/*.test.js

@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <!--
-  PAC ファイル テスター（yorozu-craft）  https://yorozu-craft.com/pac-tester/
-  このファイル 1 つで動きます。インストール不要・外部への通信なし。
-  貼り付けた PAC は、ページとは別のオリジン（sandbox の iframe の中の Worker）で評価します。
-  本体のコード: MIT License, Copyright (c) 2026 Youhei Oonuki
-  同梱ライブラリ: acorn 8.18.0
-  同梱ライブラリのライセンス全文は、画面の「ライセンス」またはこのファイルの末尾（id="licenses"）にあります。
-  ビルド: https://github.com/YouheiOonuki/pac-tester の build.mjs で作成（npm ci && node build.mjs）
+  PAC File Tester (yorozu-craft)  https://yorozu-craft.com/pac-tester/en/
+  This one file is the whole tool. Nothing to install, no network access.
+  The PAC you paste runs in a Worker inside a sandboxed iframe, in a different origin from this page.
+  Code: MIT License, Copyright (c) 2026 Youhei Oonuki
+  Bundled library: acorn 8.18.0
+  The full license text is behind the "License" button and at the end of this file (id="licenses").
+  Build: made with build.mjs from https://github.com/YouheiOonuki/pac-tester (npm ci && node build.mjs)
 -->
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 外部には一切通信しない（読み込み・送信とも禁止）。Worker は Blob からだけ起動できる。
-       PAC を評価する枠（srcdoc の iframe）と、その中の Worker もこの決まりを引き継ぐ -->
+  <!-- No network access at all (no loading, no sending). Workers can start only from Blob URLs.
+       The sandboxed iframe (srcdoc) that runs the PAC, and its Worker, inherit this policy -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; worker-src blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
   <meta name="robots" content="noindex">
   <meta name="color-scheme" content="light dark">
-  <title>PAC ファイル テスター</title>
+  <title>PAC File Tester</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%20%3Cpath%20d%3D%22M12%204h28l14%2014v40a2%202%200%200%201-2%202H12a2%202%200%200%201-2-2V6a2%202%200%200%201%202-2z%22%20fill%3D%22%23faf6ee%22%20stroke%3D%22%238b4513%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M40%204v14h14%22%20fill%3D%22none%22%20stroke%3D%22%238b4513%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M24%2053V41l-6-9m6%209%2011-11%22%20fill%3D%22none%22%20stroke%3D%22%238b4513%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M16%2038l2-6%206%201M29%2030h6v6%22%20fill%3D%22none%22%20stroke%3D%22%238b4513%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Ccircle%20cx%3D%2243%22%20cy%3D%2247%22%20r%3D%228.5%22%20fill%3D%22%233f6b2a%22%2F%3E%20%3Cpath%20d%3D%22M38.8%2047l2.8%202.8%205.6-5.6%22%20fill%3D%22none%22%20stroke%3D%22%23faf6ee%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
   <style>
-/* PAC ファイル テスター — 画面の見た目（yorozu-craft 共通の和紙風の配色。ダークモードは端末の設定に合わせる） */
 :root {
   color-scheme: light dark;
   --bg: #f0ebe0;
@@ -40,7 +39,6 @@
   --info: #3d5a80;
   --info-bg: #e3ecf6;
   --changed-bg: #fff1c4;
-  /* 戻り値の色分け（文字の色と背景の組） */
   --c-direct: #2f6b2a;  --c-direct-bg: #e2f0dc;
   --c0: #7a3e12;        --c0-bg: #f6e3d2;
   --c1: #2d5b8c;        --c1-bg: #dfeaf6;
@@ -98,7 +96,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* ヘッダー */
 .pt-header {
   position: sticky; top: 0; z-index: 10;
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1rem;
@@ -124,7 +121,6 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
-/* 本体: 左に PAC とチェック、右に URL・設定・結果 */
 .pt-main {
   flex: 1 1 auto;
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 0.8rem;
@@ -156,7 +152,6 @@ button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-
 .pt-file { color: var(--muted); font-weight: 400; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 4rem; }
 body.pt-diff-mode #pt-pac-a-wrap .pt-pac-head label::after { content: ""; }
 
-/* チェック結果 */
 .pt-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .pt-issues + h3, .pt-lint-group + .pt-lint-group { margin-top: 0.6rem; }
 .pt-lint-group h3 { margin: 0 0 0.3rem; font-size: 0.85rem; }
@@ -179,7 +174,6 @@ body.pt-diff-mode #pt-pac-a-wrap .pt-pac-head label::after { content: ""; }
 .pt-pattern-table th, .pt-pattern-table td { border-bottom: 1px solid var(--border); padding: 0.25rem 0.35rem; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 .pt-pattern-table code { font-family: ui-monospace, Consolas, monospace; }
 
-/* 設定 */
 .pt-settings > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; cursor: pointer; list-style: none; }
 .pt-settings > summary::-webkit-details-marker { display: none; }
 .pt-settings > summary h2::before { content: "▸ "; }
@@ -193,7 +187,6 @@ body.pt-diff-mode #pt-pac-a-wrap .pt-pac-head label::after { content: ""; }
 .pt-field input[type="text"] { width: 12rem; font-family: ui-monospace, Consolas, monospace; }
 .pt-row label { font-size: 0.85rem; }
 
-/* 結果 */
 .pt-legend { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.2rem; }
 .pt-legend button {
   border: 1px solid transparent; border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.78rem; cursor: pointer;
@@ -234,7 +227,6 @@ body.pt-diff-mode #pt-pac-a-wrap .pt-pac-head label::after { content: ""; }
 .pt-arrow { color: var(--muted); margin: 0 0.2rem; }
 .pt-empty { padding: 0.8rem; color: var(--muted); font-size: 0.85rem; text-align: center; }
 
-/* 下の状態表示 */
 .pt-status {
   display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   padding: 0.25rem 0.8rem; font-size: 0.75rem; color: var(--muted);
@@ -242,14 +234,12 @@ body.pt-diff-mode #pt-pac-a-wrap .pt-pac-head label::after { content: ""; }
 }
 .pt-status .is-warn { color: var(--err); }
 
-/* ドラッグ＆ドロップ */
 .pt-drop {
   position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
   background: rgba(139, 69, 19, 0.18); border: 4px dashed var(--accent); pointer-events: none;
 }
 .pt-drop p { background: var(--card); padding: 0.8rem 1.4rem; border-radius: 8px; font-weight: 700; color: var(--accent); }
 
-/* お知らせ */
 .pt-toast {
   position: fixed; left: 50%; bottom: 2.2rem; transform: translateX(-50%); z-index: 30;
   max-width: calc(100vw - 2rem); padding: 0.5rem 0.9rem; border-radius: 8px;
@@ -257,7 +247,6 @@ body.pt-diff-mode #pt-pac-a-wrap .pt-pac-head label::after { content: ""; }
 }
 .pt-toast button { margin-left: 0.6rem; background: var(--bg); color: var(--text); }
 
-/* ダイアログ */
 dialog {
   border: 1px solid var(--border); border-radius: 10px; padding: 0; background: var(--card); color: var(--text);
   width: min(40rem, calc(100vw - 1.5rem)); max-height: calc(100dvh - 2rem);
@@ -277,7 +266,6 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
 .pt-lib-list { margin: 0 0 0.6rem; padding-left: 1.3rem; font-size: 0.88rem; line-height: 1.6; }
 .pt-noscript { position: fixed; inset: auto 0 0 0; margin: 0; padding: 1rem; background: #fff4d6; color: #3a3025; }
 
-/* 狭い画面: 1 列に並べる */
 @media (max-width: 900px) {
   .pt-main { grid-template-columns: minmax(0, 1fr); padding: 0.5rem; gap: 0.6rem; }
   .pt-header { padding: 0.4rem 0.6rem; }
@@ -297,13 +285,13 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
   <header class="pt-header">
     <div class="pt-brand">
       <span class="pt-logo" aria-hidden="true">PAC</span>
-      <span class="pt-title">PAC ファイル テスター</span>
+      <span class="pt-title">PAC File Tester</span>
     </div>
-    <div class="pt-toolbar" role="toolbar" aria-label="操作">
-      <button type="button" id="pt-run" class="pt-primary" title="いまの PAC と URL 一覧で評価し直す（Ctrl+Enter）">評価する</button>
-      <button type="button" id="pt-diff" aria-pressed="false" title="旧 PAC と新 PAC を同じ URL 一覧で比べる">差分モード</button>
-      <button type="button" id="pt-sample" title="見本の PAC・URL 一覧・ホスト表を出す">見本</button>
-      <button type="button" id="pt-about" title="このツールについて・ライセンス">ライセンス</button>
+    <div class="pt-toolbar" role="toolbar" aria-label="Actions">
+      <button type="button" id="pt-run" class="pt-primary" title="Evaluate the PAC against the URL list now (Ctrl+Enter)">Evaluate</button>
+      <button type="button" id="pt-diff" aria-pressed="false" title="Compare an old and a new PAC against the same URLs">Diff mode</button>
+      <button type="button" id="pt-sample" title="Load the sample PAC, URL list and host table">Sample</button>
+      <button type="button" id="pt-about" title="About this tool and licenses">License</button>
     </div>
   </header>
 
@@ -311,38 +299,38 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
     <div class="pt-col">
       <section class="pt-card" aria-labelledby="pt-h-pac">
         <div class="pt-card-head">
-          <h2 id="pt-h-pac">PAC ファイル</h2>
-          <p class="pt-hint">貼り付けるか、ファイルをここにドラッグ。入力すると自動で評価します。</p>
+          <h2 id="pt-h-pac">PAC file</h2>
+          <p class="pt-hint">Paste it, or drag a file here. It is evaluated as you type.</p>
         </div>
         <div class="pt-pac" id="pt-pac-a-wrap">
           <div class="pt-pac-head">
             <label for="pt-pac-a" id="pt-pac-a-label">PAC</label>
             <span class="pt-file" id="pt-file-a"></span>
-            <button type="button" class="pt-small" data-open="a">開く</button>
+            <button type="button" class="pt-small" data-open="a">Open</button>
           </div>
-          <textarea id="pt-pac-a" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="function FindProxyForURL(url, host) { … } を貼り付け"></textarea>
+          <textarea id="pt-pac-a" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="Paste function FindProxyForURL(url, host) { … } here"></textarea>
         </div>
         <div class="pt-pac" id="pt-pac-b-wrap" hidden>
           <div class="pt-pac-head">
-            <label for="pt-pac-b">新 PAC（変更後）</label>
+            <label for="pt-pac-b">New PAC (changed)</label>
             <span class="pt-file" id="pt-file-b"></span>
-            <button type="button" class="pt-small" data-open="b">開く</button>
-            <button type="button" class="pt-small" id="pt-copy-ab" title="旧 PAC の内容を新 PAC に写す">旧を写す</button>
+            <button type="button" class="pt-small" data-open="b">Open</button>
+            <button type="button" class="pt-small" id="pt-copy-ab" title="Copy the old PAC into the New PAC box">Copy old</button>
           </div>
-          <textarea id="pt-pac-b" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="変更後の PAC を貼り付け"></textarea>
+          <textarea id="pt-pac-b" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="Paste the changed PAC here"></textarea>
         </div>
         <input type="file" id="pt-file-input" accept=".pac,.dat,.js,.txt,application/x-ns-proxy-autoconfig,text/plain" hidden>
-        <label class="pt-check"><input type="checkbox" id="pt-save-draft"> PAC と URL 一覧も、このブラウザに保存する（既定はオフ。共有の PC ではオフのままに）</label>
+        <label class="pt-check"><input type="checkbox" id="pt-save-draft"> Also save the PAC and URL list in this browser (off by default; leave it off on shared PCs)</label>
       </section>
 
       <section class="pt-card" aria-labelledby="pt-h-lint">
         <div class="pt-card-head">
-          <h2 id="pt-h-lint">構文・ロジックのチェック</h2>
+          <h2 id="pt-h-lint">Syntax and logic checks</h2>
           <p class="pt-hint" id="pt-lint-summary" aria-live="polite"></p>
         </div>
         <div id="pt-lint"></div>
         <details class="pt-details" id="pt-patterns-box">
-          <summary>shExpMatch のパターン一覧 <span id="pt-patterns-count"></span></summary>
+          <summary>All shExpMatch patterns <span id="pt-patterns-count"></span></summary>
           <div id="pt-patterns"></div>
         </details>
       </section>
@@ -351,57 +339,57 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
     <div class="pt-col">
       <section class="pt-card" aria-labelledby="pt-h-urls">
         <div class="pt-card-head">
-          <h2 id="pt-h-urls">テストする URL</h2>
-          <p class="pt-hint">1 行に 1 つ。ホスト名は URL から取り出します（# で始まる行はメモ）。</p>
+          <h2 id="pt-h-urls">URLs to test</h2>
+          <p class="pt-hint">One per line. The host name is taken from the URL (lines starting with # are comments).</p>
         </div>
         <textarea id="pt-urls" class="pt-code" rows="8" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" aria-labelledby="pt-h-urls"></textarea>
         <div class="pt-row">
-          <button type="button" class="pt-small" id="pt-urls-open">.txt を開く</button>
-          <button type="button" class="pt-small" id="pt-urls-save">.txt で保存</button>
+          <button type="button" class="pt-small" id="pt-urls-open">Open .txt</button>
+          <button type="button" class="pt-small" id="pt-urls-save">Save as .txt</button>
           <input type="file" id="pt-urls-input" accept=".txt,.csv,text/plain" hidden>
         </div>
       </section>
 
       <details class="pt-card pt-settings" id="pt-settings">
-        <summary><h2>評価の設定</h2><span class="pt-hint" id="pt-settings-summary"></span></summary>
+        <summary><h2>Evaluation settings</h2><span class="pt-hint" id="pt-settings-summary"></span></summary>
         <div class="pt-field">
-          <label for="pt-hosts">ホスト名と IP アドレスの対応表（DNS の代わり）</label>
-          <p class="pt-hint">dnsResolve・isInNet・isResolvable が使います。ここに無いホストは「解決できない」扱いです。「*.example.com 10.0.0.1」の形で下のホストすべてにも当てられます。</p>
+          <label for="pt-hosts">Host-to-IP table (used instead of DNS)</label>
+          <p class="pt-hint">Used by dnsResolve, isInNet and isResolvable. Hosts not listed here can't be resolved. &quot;*.example.com 10.0.0.1&quot; applies to every host under that domain.</p>
           <textarea id="pt-hosts" class="pt-code" rows="5" spellcheck="false" autocomplete="off" wrap="off"></textarea>
           <p class="pt-warn" id="pt-hosts-errors"></p>
         </div>
         <div class="pt-field">
-          <label for="pt-myip">myIpAddress() が返す IP アドレス</label>
+          <label for="pt-myip">IP address returned by myIpAddress()</label>
           <input type="text" id="pt-myip" inputmode="decimal" autocomplete="off" spellcheck="false">
         </div>
         <div class="pt-field">
-          <span class="pt-label" id="pt-when-label">評価に使う日時（weekdayRange・dateRange・timeRange 用）</span>
-          <label class="pt-check"><input type="checkbox" id="pt-use-now"> いまの日時を使う</label>
+          <span class="pt-label" id="pt-when-label">Date and time the script sees (for weekdayRange, dateRange and timeRange)</span>
+          <label class="pt-check"><input type="checkbox" id="pt-use-now"> Use the current date and time</label>
           <div class="pt-row" role="group" aria-labelledby="pt-when-label">
-            <label for="pt-datetime" class="pt-visually-hidden">日時</label>
+            <label for="pt-datetime" class="pt-visually-hidden">Date and time</label>
             <input type="datetime-local" id="pt-datetime" step="1">
-            <label for="pt-tz">UTC との時差</label>
+            <label for="pt-tz">UTC offset</label>
             <select id="pt-tz"></select>
           </div>
         </div>
         <div class="pt-field">
-          <label class="pt-check"><input type="checkbox" id="pt-strip-https"> https の URL は、パスとクエリを除いて渡す（Chrome・Edge などの動き。例: https://www.example.com/a?b → https://www.example.com/）</label>
+          <label class="pt-check"><input type="checkbox" id="pt-strip-https"> Strip the path and query from https URLs (as Chrome and Edge do. Example: https://www.example.com/a?b → https://www.example.com/)</label>
         </div>
-        <p class="pt-hint">設定はこのブラウザに保存されます（PAC の中身とは別）。「見本」で見本の設定に戻せます。</p>
+        <p class="pt-hint">Settings are saved in this browser (separately from the PAC). &quot;Sample&quot; restores the sample settings.</p>
       </details>
 
       <section class="pt-card" aria-labelledby="pt-h-results">
         <div class="pt-card-head">
-          <h2 id="pt-h-results">結果</h2>
+          <h2 id="pt-h-results">Results</h2>
           <p class="pt-hint" id="pt-summary" aria-live="polite"></p>
         </div>
-        <div class="pt-legend" id="pt-legend" aria-label="戻り値ごとの件数（押すと絞り込み）"></div>
+        <div class="pt-legend" id="pt-legend" aria-label="Count per return value (click to filter)"></div>
         <div class="pt-row pt-filters">
-          <label for="pt-filter" class="pt-visually-hidden">URL・結果で絞り込み</label>
-          <input type="search" id="pt-filter" placeholder="URL・結果で絞り込み">
-          <label class="pt-check" id="pt-only-changed-wrap" hidden><input type="checkbox" id="pt-only-changed"> 変わった行だけ</label>
-          <label class="pt-check"><input type="checkbox" id="pt-only-problems"> エラー・注意だけ</label>
-          <button type="button" class="pt-small" id="pt-csv">CSV で保存</button>
+          <label for="pt-filter" class="pt-visually-hidden">Filter by URL or result</label>
+          <input type="search" id="pt-filter" placeholder="Filter by URL or result">
+          <label class="pt-check" id="pt-only-changed-wrap" hidden><input type="checkbox" id="pt-only-changed"> Changed rows only</label>
+          <label class="pt-check"><input type="checkbox" id="pt-only-problems"> Errors and warnings only</label>
+          <button type="button" class="pt-small" id="pt-csv">Save as CSV</button>
         </div>
         <div class="pt-table-wrap">
           <table class="pt-table" id="pt-table">
@@ -416,32 +404,33 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
 
   <footer class="pt-status">
     <span id="pt-status" aria-live="polite"></span>
-    <span class="pt-offline">通信しません・PAC は隔離した枠の中で評価します</span>
+    <span class="pt-offline">No network access. The PAC runs in a sandbox</span>
   </footer>
 
-  <div class="pt-drop" id="pt-drop" hidden><p>ここに離すと開きます</p></div>
+  <div class="pt-drop" id="pt-drop" hidden><p>Drop to open</p></div>
   <div class="pt-toast" id="pt-toast" role="status" hidden><span id="pt-toast-text"></span> <button type="button" id="pt-toast-action" hidden></button></div>
 
   <dialog id="pt-about-dialog" aria-labelledby="pt-about-title">
     <form method="dialog" class="pt-dialog">
-      <h2 id="pt-about-title">このツールについて</h2>
-      <p>PAC ファイル テスター（yorozu-craft）。この HTML ファイル 1 つで動き、外部には一切通信しません。貼り付けた PAC は、ページとは別のオリジンを持つ枠（sandbox の iframe）の中の Worker で評価するので、このページの保存領域や、ほかのサイトには触れられません。</p>
-      <p>使い方・よくある質問：<a href="https://yorozu-craft.com/pac-tester/guide.html" target="_blank" rel="noopener noreferrer">https://yorozu-craft.com/pac-tester/guide.html</a>（リンクを押したときだけ開きます）</p>
-      <h3>同梱しているライブラリ</h3>
+      <h2 id="pt-about-title">About this tool</h2>
+      <p>PAC File Tester (yorozu-craft). This one HTML file is the whole tool, and it never connects to the network. The PAC you paste runs in a Worker inside a sandboxed iframe with a different origin from this page, so it can't touch this page's storage or any other site.</p>
+      <p>Guide and FAQ: <a href="https://yorozu-craft.com/pac-tester/en/guide.html" target="_blank" rel="noopener noreferrer">https://yorozu-craft.com/pac-tester/en/guide.html</a> (opens only if you click it)</p>
+      <p>Japanese version (<span lang="ja">日本語版</span>): <a href="https://yorozu-craft.com/pac-tester/" hreflang="ja" target="_blank" rel="noopener noreferrer">https://yorozu-craft.com/pac-tester/</a></p>
+      <h3>Bundled library</h3>
       <ul class="pt-lib-list">
-        <li>acorn 8.18.0（MIT）… PAC の構文を調べる（構文木を作るだけで、PAC は実行しない）</li>
+        <li>acorn 8.18.0 (MIT): parses the PAC for the checks (it only builds a syntax tree and never runs the PAC)</li>
       </ul>
-      <p class="pt-hint">このツールのコードは MIT License です。同梱ライブラリのライセンス全文は次のとおりです。</p>
+      <p class="pt-hint">This tool's code is under the MIT License. The full license text of the bundled library follows.</p>
       <pre class="pt-license-text" id="pt-license-text" tabindex="0"></pre>
       <div class="pt-dialog-buttons">
-        <button type="submit" value="close" class="pt-primary">閉じる</button>
+        <button type="submit" value="close" class="pt-primary">Close</button>
       </div>
     </form>
   </dialog>
 
-  <noscript><p class="pt-noscript">このツールは JavaScript を使います。ブラウザの設定で JavaScript を有効にしてください。</p></noscript>
+  <noscript><p class="pt-noscript">This tool needs JavaScript. Please enable JavaScript in your browser.</p></noscript>
 
-<script>/* acorn 8.18.0 | MIT | 全文は末尾の id="licenses" */
+<script>/* acorn 8.18.0 | MIT | full text at the end, id="licenses" */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -6786,250 +6775,242 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
 }));
 
 </script>
-<script>/* PAC ファイル テスター: messages.js（日本語） | MIT */
+<script>/* PAC File Tester: messages.js (English) | MIT */
 window.PT_MSG = {
  "core": {
   "samplePac": {
-   "head": "見本の PAC ファイル（架空のドメインとプライベート IP アドレスだけを使っています）",
-   "c1": "1. ドットの無いホスト名（例: http://intranet/）はプロキシを通さない",
-   "c2": "2. 組織の中のドメインはプロキシを通さない",
-   "c3": "3. プライベート IP アドレス（ホスト名は「ホスト名と IP アドレスの対応表」で IP にしてから比べる）",
-   "c4": "4. 動画の配信は別のプロキシへ",
-   "c5": "5. 更新ファイルの配布サーバー（http だけ）はプロキシを通さない",
-   "c6": "6. 支店のネットワーク（自分の IP アドレスで判断）は支店のプロキシへ。つながらなければ直接",
-   "c7": "7. それ以外は標準のプロキシ。落ちていたら予備のプロキシ"
+   "head": "Sample PAC file (uses only example domains and private IP addresses)",
+   "c1": "1. Host names without a dot (for example http://intranet/) go direct",
+   "c2": "2. Internal domains go direct",
+   "c3": "3. Private IP addresses (host names are first turned into IPs with the host-to-IP table)",
+   "c4": "4. Video streaming goes through a separate proxy",
+   "c5": "5. The update server (http only) goes direct",
+   "c6": "6. Branch office network (by our own IP address): branch proxy, or direct if it is down",
+   "c7": "7. Everything else: the main proxy, or the backup proxy if it is down"
   },
-  "sampleUrlsHead": "1 行に 1 つの URL（# で始まる行はメモ）",
-  "sampleHostsHead": "ホスト名 と IP アドレス（1 行に 1 組。hosts ファイルと同じ「IP ホスト名」の順でも可）",
-  "urlUnreadable": "URL として読めません",
-  "hostNeedTwo": "ホスト名と IP アドレスの 2 つを書いてください",
-  "hostNoIp": "IPv4 アドレス（例: 192.168.0.10）が見つかりません",
-  "rvNotString": "文字列ではありません",
-  "rvEmpty": "空の文字列です（ブラウザは DIRECT として扱うことが多いですが、意図どおりか確かめてください）",
-  "rvWide": "全角文字が入っています",
-  "rvComma": "区切りに「,」が使われています（正しくは「;」）",
-  "rvEmptyItem": "「;」が続いています（空の項目があります）",
-  "rvNoHostPort": "「{item}」の後ろにホスト名:ポートがありません",
-  "rvColon": "「{item}」: 種類とホスト名の間は空白で区切ります（例: PROXY proxy.example.com:8080）",
-  "rvBadForm": "「{item}」は DIRECT・PROXY ホスト:ポート・SOCKS ホスト:ポート などの形になっていません",
-  "rvPortRange": "「{item}」のポート番号が 1〜65535 の範囲外です",
-  "resTimeout": "（タイムアウト）",
-  "resError": "（エラー）",
-  "resType": "（{type}）",
-  "synEnd": "コードが途中で終わっています（閉じ括弧「}」「)」が足りない可能性があります）",
-  "synUnexpected": "ここで予期しない記号があります（括弧・引用符・カンマ・セミコロン・演算子の過不足を確かめてください）",
-  "synString": "文字列の引用符が閉じていません（\" と ' の対応を確かめてください）",
-  "synComment": "コメント（/* … */）が閉じていません",
-  "synTemplate": "テンプレート文字列（` … `）が閉じていません",
-  "synRegex": "正規表現（/ … /）が閉じていません",
-  "synChar": "使えない文字「{ch}」があります（全角の記号や、和文の引用符ではありませんか）",
-  "synKeyword": "ここに「{word}」は書けません",
-  "synReturnOutside": "return が関数の外にあります（{ } の対応を確かめてください）",
-  "synDup": "「{name}」が 2 回宣言されています",
-  "synAssign": "代入できない場所に「=」があります（比べるときは == か === です）",
-  "synBadRegex": "正規表現の書き方が正しくありません",
-  "synOctal": "0 で始まる数字は書けません",
-  "synReserved": "予約語はここに書けません",
-  "synOther": "構文エラー（{msg}）",
-  "empty": "PAC が空です",
-  "wideString": "文字列の中に{what}があります「{chunk}」（ホスト名や戻り値に全角文字は使えません）",
-  "wideCode": "コードの中に{what}があります「{chunk}」（半角に直してください）",
-  "wFwSpace": "全角スペース",
-  "wZeroWidth": "目に見えない文字（ゼロ幅スペースなど）",
-  "wNbsp": "特殊な空白（ノーブレークスペース）",
-  "wQuote": "和文の引用符",
-  "wFwAlnum": "全角の英数字・記号",
-  "wOther": "全角文字",
-  "quoteOpen": "引用符 {q} が閉じていません",
-  "bracketExtra": "閉じ括弧「{ch}」に対応する開き括弧がありません",
-  "bracketMismatch": "括弧の対応がずれています: {line} 行目の「{open}」を「{ch}」で閉じています",
-  "bracketOpen": "開き括弧「{ch}」が閉じていません",
-  "noEntry": "FindProxyForURL という関数がありません（名前の大文字・小文字も確かめてください）",
-  "wrongName": "「{name}」は名前が違います（正しくは FindProxyForURL）",
-  "dupEntry": "FindProxyForURL が {n} つあります（最後に書いたものが使われます）",
-  "params": "FindProxyForURL の引数は (url, host) の 2 つです（今は {n} つ）",
-  "asyncFn": "FindProxyForURL を async や function* にはできません",
-  "noReturn": "関数の最後まで来たときの return がありません（どの条件にも当てはまらない URL で、戻り値が undefined になります。最後に return \"DIRECT\"; などを書いてください）",
-  "emptyReturn": "値の無い return があります（戻り値が undefined になります）",
-  "badReturn": "戻り値 \"{v}\": {why}",
-  "override": "標準のヘルパー関数「{name}」を自分で定義しています（こちらの定義が使われます）",
-  "argCount": "{name} の引数は {n} つです（今は {m} つ）",
-  "isInNetArg": "isInNet の{which} \"{v}\" が IPv4 アドレスの形になっていません（例: \"255.255.0.0\"。\"/16\" の形は使えません）",
-  "argNet": "第 2 引数（ネットワーク）",
-  "argMask": "第 3 引数（マスク）",
-  "maskNonContig": "isInNet のマスク \"{mask}\" は、1 が左から連続していません（ネットワークとマスクを逆に書いていませんか）",
-  "domainNoDot": "dnsDomainIs(…, \"{dom}\") は、先頭にドットが無いので「bad{dom}」のようなホストにも当てはまります（サブドメインだけなら \".{dom}\"）",
-  "domainWild": "dnsDomainIs では * や ? は使えません（shExpMatch を使います）",
-  "weekday": "weekdayRange の \"{v}\" は使えません（\"MON\" のように大文字の英語 3 文字。小文字は多くのブラウザで false になります）",
-  "timeRange": "timeRange({a}, {b}) は、多くのブラウザで常に false です（時だけの指定は日をまたげません。timeRange({a}, 0, {b}, 0) の形なら日をまたげます）",
-  "shadow": "このルール {c} には到達しません。{line} 行目の {a} が先にすべて当てはまります",
-  "shadowSame": "（戻り値が同じなので結果は変わりません）",
-  "shadowDiff": "（順番を入れ替えるか、上のパターンを狭めてください）",
-  "pSpace": "前後に空白があります（空白も文字として比べます）",
-  "pWide": "全角文字が入っています",
-  "pRegex": "shExpMatch で使える記号は * と ? だけです（正規表現ではありません）",
-  "pHostScheme": "host にはスキーム（http:// など）は含まれません。URL 全体と比べるなら shExpMatch(url, …) にします",
-  "pHostPath": "host にはパス（/ 以降）は含まれません",
-  "pHostUpper": "大文字が入っています（ブラウザが渡すホスト名は小文字なので、当てはまりません）",
-  "pHostPort": "host にはポート番号は含まれません",
-  "pNoStarDot": "* がありません。「{p}」という名前そのものとしか一致しません（サブドメインすべてなら \"*{p}\"）",
-  "pExact": "* も ? も無いので、ホスト名が完全に同じときだけ一致します",
-  "pExactSub": "（サブドメインも含めるなら \"*.{p}\" も書きます）",
-  "pUrlScheme": "url はスキーム（http:// など）から始まります。先頭を \"*\" か \"http://\" にしてください",
-  "pUrlSlash": "url は最後に「/」やパスが付くので、このパターンとは一致しません（末尾に \"/*\" を付けてください）",
-  "pHttpsPath": "Chrome・Edge などは https の URL のパスとクエリを PAC に渡さない（https://ホスト/ だけ）ので、パスを使った判定は効きません"
+  "sampleUrlsHead": "One URL per line (lines starting with # are comments)",
+  "sampleHostsHead": "Host name and IP address, one pair per line (hosts-file order \"IP host\" also works)",
+  "urlUnreadable": "Not a valid URL",
+  "hostNeedTwo": "Write a host name and an IP address",
+  "hostNoIp": "No IPv4 address found (for example 192.168.0.10)",
+  "rvNotString": "Not a string",
+  "rvEmpty": "Empty string (browsers usually treat it as DIRECT; check that this is what you want)",
+  "rvWide": "Contains full-width characters",
+  "rvComma": "Uses \",\" as a separator (it must be \";\")",
+  "rvEmptyItem": "Two \";\" in a row (an empty entry)",
+  "rvNoHostPort": "\"{item}\" has no host:port after it",
+  "rvColon": "\"{item}\": separate the type and the host with a space (for example PROXY proxy.example.com:8080)",
+  "rvBadForm": "\"{item}\" is not a valid entry such as DIRECT, PROXY host:port or SOCKS host:port",
+  "rvPortRange": "\"{item}\": the port is outside 1-65535",
+  "resTimeout": "(timeout)",
+  "resError": "(error) ",
+  "resType": "({type}) ",
+  "synEnd": "The code ends too early (a closing \"}\" or \")\" may be missing)",
+  "synUnexpected": "Unexpected token here (check for missing or extra brackets, quotes, commas, semicolons or operators)",
+  "synString": "Unclosed string (check that \" and ' are paired)",
+  "synComment": "Unclosed comment (/* … */)",
+  "synTemplate": "Unclosed template string (` … `)",
+  "synRegex": "Unclosed regular expression (/ … /)",
+  "synChar": "Invalid character \"{ch}\" (a full-width symbol or a curly quote?)",
+  "synKeyword": "\"{word}\" is not allowed here",
+  "synReturnOutside": "return outside a function (check that { } are paired)",
+  "synDup": "\"{name}\" is declared twice",
+  "synAssign": "\"=\" where nothing can be assigned (use == or === to compare)",
+  "synBadRegex": "Invalid regular expression",
+  "synOctal": "Numbers can't start with 0",
+  "synReserved": "Reserved word not allowed here",
+  "synOther": "Syntax error ({msg})",
+  "empty": "The PAC is empty",
+  "wideString": "{what} in a string: \"{chunk}\" (host names and return values can't contain full-width characters)",
+  "wideCode": "{what} in the code: \"{chunk}\" (replace it with a normal ASCII character)",
+  "wFwSpace": "Full-width space",
+  "wZeroWidth": "Invisible character (zero-width space or similar)",
+  "wNbsp": "Non-breaking space",
+  "wQuote": "Curly or CJK quote",
+  "wFwAlnum": "Full-width letter or symbol",
+  "wOther": "Non-ASCII character",
+  "quoteOpen": "Unclosed quote {q}",
+  "bracketExtra": "Closing \"{ch}\" has no matching opening bracket",
+  "bracketMismatch": "Brackets don't match: \"{open}\" on line {line} is closed with \"{ch}\"",
+  "bracketOpen": "Opening \"{ch}\" is never closed",
+  "noEntry": "No FindProxyForURL function (check the upper and lower case too)",
+  "wrongName": "\"{name}\" is the wrong name (it must be FindProxyForURL)",
+  "dupEntry": "FindProxyForURL is defined {n} times (the last one is used)",
+  "params": "FindProxyForURL takes 2 parameters, (url, host); this one has {n}",
+  "asyncFn": "FindProxyForURL can't be async or a generator (function*)",
+  "noReturn": "No return at the end of the function (a URL that matches no condition gets undefined. End with return \"DIRECT\"; or similar)",
+  "emptyReturn": "return without a value (the result is undefined)",
+  "badReturn": "Return value \"{v}\": {why}",
+  "override": "The script defines the standard helper \"{name}\" itself (its own version is used)",
+  "argCount": "{name} takes {n} argument(s); this call has {m}",
+  "isInNetArg": "isInNet {which} \"{v}\" is not an IPv4 address (use a form like \"255.255.0.0\"; \"/16\" doesn't work)",
+  "argNet": "network (2nd argument)",
+  "argMask": "mask (3rd argument)",
+  "maskNonContig": "isInNet mask \"{mask}\" is not contiguous (are the network and the mask swapped?)",
+  "domainNoDot": "dnsDomainIs(…, \"{dom}\") has no leading dot, so it also matches hosts like \"bad{dom}\" (use \".{dom}\" for subdomains only)",
+  "domainWild": "dnsDomainIs doesn't support * or ? (use shExpMatch)",
+  "weekday": "weekdayRange: \"{v}\" is not valid (use 3 upper-case letters such as \"MON\"; lower case is false in most browsers)",
+  "timeRange": "timeRange({a}, {b}) is always false in most browsers (an hours-only range can't wrap past midnight; timeRange({a}, 0, {b}, 0) can)",
+  "shadow": "This rule {c} is never reached: {a} on line {line} matches everything first",
+  "shadowSame": " (same return value, so the results don't change)",
+  "shadowDiff": " (swap the order or narrow the earlier pattern)",
+  "pSpace": "Leading or trailing space (spaces are matched literally)",
+  "pWide": "Contains full-width characters",
+  "pRegex": "Only * and ? are special in shExpMatch (it is not a regular expression)",
+  "pHostScheme": "host has no scheme (http:// etc.). To match the whole URL, use shExpMatch(url, …)",
+  "pHostPath": "host has no path (nothing from / onwards)",
+  "pHostUpper": "Contains upper case (browsers pass host names in lower case, so this never matches)",
+  "pHostPort": "host has no port number",
+  "pNoStarDot": "No *: matches only the exact name \"{p}\" (for all subdomains use \"*{p}\")",
+  "pExact": "No * or ?: matches only this exact host name",
+  "pExactSub": " (to include subdomains, also add \"*.{p}\")",
+  "pUrlScheme": "url starts with a scheme (http:// etc.). Start the pattern with \"*\" or \"http://\"",
+  "pUrlSlash": "url always has a \"/\" or a path after the host, so this never matches (add \"/*\" at the end)",
+  "pHttpsPath": "For https URLs, Chrome, Edge and others pass only the scheme and host (such as https://www.example.com/) without the path or query, so path rules don't work"
  },
  "app": {
-  "saveFailed": "このブラウザには保存できませんでした（容量やプライベートモードの制限）",
-  "settingsSummary": "ホスト表 {n} 件・myIpAddress {ip}・{when}",
-  "notSet": "（未設定）",
-  "nowLabel": "いまの日時",
-  "hostErrLine": "{line} 行目: {msg}",
-  "sep": " ／ ",
-  "tzJapan": "（日本）",
-  "whenFormat": "{y}年{mon}{d}日（{wd}）{time}（{tz}）",
+  "saveFailed": "Could not save in this browser (storage full or private mode)",
+  "settingsSummary": "Host table: {n}, myIpAddress: {ip}, {when}",
+  "notSet": "(not set)",
+  "nowLabel": "current date and time",
+  "hostErrLine": "Line {line}: {msg}",
+  "sep": " / ",
+  "tzJapan": " (Japan)",
+  "whenFormat": "{wd} {d} {mon} {y} {time} ({tz})",
   "weekdays": [
-   "日",
-   "月",
-   "火",
-   "水",
-   "木",
-   "金",
-   "土"
+   "Sun",
+   "Mon",
+   "Tue",
+   "Wed",
+   "Thu",
+   "Fri",
+   "Sat"
   ],
   "months": [
-   "1月",
-   "2月",
-   "3月",
-   "4月",
-   "5月",
-   "6月",
-   "7月",
-   "8月",
-   "9月",
-   "10月",
-   "11月",
-   "12月"
+   "Jan",
+   "Feb",
+   "Mar",
+   "Apr",
+   "May",
+   "Jun",
+   "Jul",
+   "Aug",
+   "Sep",
+   "Oct",
+   "Nov",
+   "Dec"
   ],
-  "iframeTitle": "PAC を評価する枠（表示はしません）",
-  "loadErrorRow": "評価できません（PAC を読み込めませんでした）",
-  "watchdogRow": "評価用の枠が応答しないので止めました",
-  "watchdogStatus": "評価用の枠が応答しなかったので、作り直しました",
-  "evaluating": "評価しています…",
-  "finished": "評価しました: URL {n} 件{x2}・{sec} 秒{to}",
-  "finishedX2": " × 2（旧・新）",
-  "finishedTimeouts": "・タイムアウト {n} 件",
-  "sevError": "エラー",
-  "sevWarning": "注意",
-  "sevInfo": "参考",
-  "oldPac": "旧 PAC",
-  "newPac": "新 PAC",
-  "noProblems": "✓ 問題は見つかりませんでした",
-  "goToLine": "{line} 行目へ移動",
-  "lineN": "{line} 行目",
-  "lintErrors": "エラー {n}",
-  "lintWarnings": "注意 {n}",
-  "lintInfos": "参考 {n}",
-  "lintJoin": "・",
-  "lintSuffix": " 件",
-  "noIssues": "問題なし",
-  "patternsCount": "（{n} 件）",
-  "noPatterns": "shExpMatch の呼び出しはありません（パターンが文字列で書かれているものだけを数えます）。",
-  "thLine": "行",
-  "thRole": "比べる値",
-  "thPattern": "パターン",
-  "thNotes": "メモ",
-  "oldShort": "旧",
-  "newShort": "新",
-  "pending": "評価中…",
-  "timeout": "タイムアウト",
-  "error": "エラー",
-  "emptyString": "\"\"（空）",
-  "undefinedValue": "undefined（戻り値なし）",
-  "typedValue": "{v}（{type}）",
-  "notStringValue": "戻り値が文字列ではありません（return が抜けていませんか）",
-  "thUrl": "URL（ホスト）",
-  "thResult": "結果",
-  "legendTitle": "結果が「{label}」の行だけを出す（もう一度押すと解除）",
-  "legendTitleDiff": "新 PAC の結果が「{label}」の行だけを出す（もう一度押すと解除）",
-  "changed": "変更",
-  "pacUrlPart": "　PAC に渡す URL: {url}",
-  "noMatchRows": "条件に合う行はありません",
-  "noUrls": "テストする URL を入れてください",
-  "sumUrls": "URL {n} 件",
-  "sumEvaluating": "評価中 {done}/{n}",
-  "sumChanged": "{soFar}結果が変わった URL: {n} 件",
-  "sumSoFar": "いまのところ ",
-  "sumProblems": "エラー・注意 {n} 件",
-  "sumBadLines": "読めない行 {n} 件（{lines}）",
-  "sumMax": "先頭の {n} 件だけを評価",
-  "sumShown": "表示 {n} 件",
-  "sumJoin": "・",
-  "loadErrOld": "旧 PAC: ",
-  "loadErrNew": "新 PAC: ",
-  "usedWhen": "評価に使った日時: {when}",
+  "iframeTitle": "PAC sandbox (not shown)",
+  "loadErrorRow": "Not evaluated (the PAC could not be loaded)",
+  "watchdogRow": "Stopped: the sandbox stopped responding",
+  "watchdogStatus": "The sandbox stopped responding, so it was restarted",
+  "evaluating": "Evaluating…",
+  "finished": "Done. URLs: {n}{x2}, {sec} s{to}",
+  "finishedX2": " × 2 (old and new)",
+  "finishedTimeouts": ", timeouts: {n}",
+  "sevError": "Error",
+  "sevWarning": "Warning",
+  "sevInfo": "Info",
+  "oldPac": "Old PAC",
+  "newPac": "New PAC",
+  "noProblems": "✓ No problems found",
+  "goToLine": "Go to line {line}",
+  "lineN": "Line {line}",
+  "lintErrors": "Errors: {n}",
+  "lintWarnings": "Warnings: {n}",
+  "lintInfos": "Info: {n}",
+  "lintJoin": ", ",
+  "lintSuffix": "",
+  "noIssues": "No problems",
+  "patternsCount": "({n})",
+  "noPatterns": "No shExpMatch calls (only patterns written as string literals are counted).",
+  "thLine": "Line",
+  "thRole": "Compares",
+  "thPattern": "Pattern",
+  "thNotes": "Notes",
+  "oldShort": "Old",
+  "newShort": "New",
+  "pending": "Evaluating…",
+  "timeout": "Timeout",
+  "error": "Error",
+  "emptyString": "\"\" (empty)",
+  "undefinedValue": "undefined (nothing returned)",
+  "typedValue": "{v} ({type})",
+  "notStringValue": "The return value is not a string (is a return missing?)",
+  "thUrl": "URL (host)",
+  "thResult": "Result",
+  "legendTitle": "Show only rows whose result is \"{label}\" (click again to clear)",
+  "legendTitleDiff": "Show only rows whose new PAC result is \"{label}\" (click again to clear)",
+  "changed": "Changed",
+  "pacUrlPart": " | passed to PAC: {url}",
+  "noMatchRows": "No rows match",
+  "noUrls": "Enter the URLs to test",
+  "sumUrls": "URLs: {n}",
+  "sumEvaluating": "evaluating {done}/{n}",
+  "sumChanged": "URLs with a different result{soFar}: {n}",
+  "sumSoFar": " so far",
+  "sumProblems": "errors and warnings: {n}",
+  "sumBadLines": "unreadable lines: {n} ({lines})",
+  "sumMax": "only the first {n} are evaluated",
+  "sumShown": "shown: {n}",
+  "sumJoin": ", ",
+  "loadErrOld": "Old PAC: ",
+  "loadErrNew": "New PAC: ",
+  "usedWhen": "Date and time used: {when}",
   "pacLabel": "PAC",
-  "oldPacLabel": "旧 PAC（いまの版）",
-  "copiedToNew": "新 PAC の欄に、いまの PAC を写しました。書き換えると、結果が変わった URL が強調されます",
-  "fileTooBig": "ファイルが大きすぎます（5MB まで）",
-  "fileReadError": "ファイルを読めませんでした",
-  "opened": "{name} を開きました",
-  "loaded": "{name} を読み込みました",
-  "noResults": "結果がありません",
+  "oldPacLabel": "Old PAC (current)",
+  "copiedToNew": "Copied the current PAC into the New PAC box. Edit it, and URLs whose result changes are highlighted",
+  "fileTooBig": "File too large (5 MB max)",
+  "fileReadError": "Could not read the file",
+  "opened": "Opened {name}",
+  "loaded": "Loaded {name}",
+  "noResults": "No results",
   "csvHeaderDiff": [
-   "番号",
+   "No.",
    "URL",
-   "PAC に渡した URL",
-   "ホスト",
-   "旧 PAC の結果",
-   "新 PAC の結果",
-   "変化",
-   "旧 alert",
-   "新 alert"
+   "URL passed to PAC",
+   "Host",
+   "Old PAC result",
+   "New PAC result",
+   "Change",
+   "Old alert",
+   "New alert"
   ],
   "csvHeader": [
-   "番号",
+   "No.",
    "URL",
-   "PAC に渡した URL",
-   "ホスト",
-   "結果",
-   "注意",
+   "URL passed to PAC",
+   "Host",
+   "Result",
+   "Warning",
    "alert",
-   "時間(ms)"
+   "Time (ms)"
   ],
-  "csvNotString": "文字列ではありません",
-  "sampleName": "見本",
-  "replacedWithSample": "見本に置き換えました",
-  "undo": "元に戻す",
-  "openedSaved": "保存しておいた PAC を開きました",
-  "showingSample": "見本の PAC を表示しています。自分の PAC を貼り付けるか、ファイルをドラッグしてください",
-  "editing": "（編集中）",
-  "draftOn": "PAC と URL 一覧を、このブラウザに保存します",
-  "draftOff": "保存しておいた PAC と URL 一覧を消しました"
+  "csvNotString": "Not a string",
+  "sampleName": "Sample",
+  "replacedWithSample": "Replaced with the sample",
+  "undo": "Undo",
+  "openedSaved": "Opened the saved PAC",
+  "showingSample": "Showing the sample PAC. Paste your own PAC or drag a file onto the page",
+  "editing": " (edited)",
+  "draftOn": "The PAC and URL list will be saved in this browser",
+  "draftOff": "Deleted the saved PAC and URL list"
  },
  "sandbox": {
-  "workerBoot": "評価用の Worker を起動できませんでした（{msg}）",
-  "loadTimeout": "PAC の読み込み（関数の外のコード）が {ms} ミリ秒を超えたので止めました",
-  "loadFail": "PAC を読み込めませんでした{line}：{msg}",
-  "loadFailLine": "（{line} 行目）",
-  "syntaxError": "構文エラー",
-  "evalTimeout": "{ms} ミリ秒を超えたので止めました（無限ループや重い処理がないか確かめてください）"
+  "workerBoot": "Could not start the evaluation Worker ({msg})",
+  "loadTimeout": "Stopped: loading the PAC (code outside the function) took over {ms} ms",
+  "loadFail": "Could not load the PAC{line}: {msg}",
+  "loadFailLine": " (line {line})",
+  "syntaxError": "syntax error",
+  "evalTimeout": "Stopped after {ms} ms (check for infinite loops or heavy processing)"
  },
  "worker": {
-  "noEntry": "FindProxyForURL という関数がありません",
-  "timeRangeArgs": "timeRange: 引数の数が正しくありません（1・2・4・6 個）"
+  "noEntry": "No FindProxyForURL function",
+  "timeRangeArgs": "timeRange: wrong number of arguments (1, 2, 4 or 6)"
  }
 };
 </script>
-<script>/* PAC ファイル テスター: core.js | MIT */
-// ===========================
-// PAC ファイル テスター — 画面から切り離した純粋な関数（Node のテストと画面の両方で使う）
-// URL 一覧・ホスト表の読み取り、構文・ロジックのチェック（lint。acorn で構文木を作るだけで、PAC は実行しない）、
-// 戻り値の形のチェック、差分、CSV、見本
-// 文言は messages.js の core（言語ごと）。ブラウザでは build.mjs が埋め込んだ window.PT_MSG、Node では messages.js の ja を使う
-// （Node で英語を使うときは require('./core.js').forLang('en')）
-// 注意: このファイルは pac-tester.html の script 要素にそのまま入るので、「<」のすぐ後ろに script と書かない
-// ===========================
+<script>/* PAC File Tester: core.js | MIT */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
     var MSG = require('./messages.js');
@@ -7040,7 +7021,6 @@ window.PT_MSG = {
 })(typeof self !== 'undefined' ? self : this, function (M) {
   'use strict';
 
-  // 「{name}」に値を差し込む（vars に無い名前は、そのまま残す）
   function fmt(s, vars) {
     return String(s).replace(/\{(\w+)\}/g, function (m, k) {
       return vars && Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : m;
@@ -7048,7 +7028,6 @@ window.PT_MSG = {
   }
   var SP = M.samplePac;
 
-  // ---------- 見本（架空のドメイン example.com / example.net / example.org / *.example と、プライベート IP アドレスだけ） ----------
   var SAMPLE_PAC = [
     '// ' + SP.head,
     'function FindProxyForURL(url, host) {',
@@ -7117,7 +7096,6 @@ window.PT_MSG = {
 
   var SAMPLE_MY_IP = '192.168.1.10';
 
-  // ---------- 文字まわり ----------
   var IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
   function isIPv4(s) {
     var m = IPV4.exec(String(s));
@@ -7126,8 +7104,6 @@ window.PT_MSG = {
     return true;
   }
 
-  // ---------- URL 一覧 ----------
-  // opts.stripHttpsPath: https（と wss）の URL は、パスとクエリを除いて「https://ホスト/」だけを渡す（Chrome・Edge の動き）
   function parseUrlList(text, opts) {
     opts = opts || {};
     var out = [];
@@ -7157,7 +7133,6 @@ window.PT_MSG = {
     return out;
   }
 
-  // ---------- ホスト名と IP の対応表 ----------
   function parseHostTable(text) {
     var hosts = {};
     var errors = [];
@@ -7175,10 +7150,8 @@ window.PT_MSG = {
     return { hosts: hosts, errors: errors };
   }
 
-  // ---------- 戻り値の形 ----------
   var PROXY_ITEM = /^(PROXY|HTTP|HTTPS|SOCKS|SOCKS4|SOCKS5|QUIC)\s+(\[[0-9A-Fa-f:.]+\]|[^\s:;\[\]]+)(:(\d{1,5}))?$/i;
 
-  // 戻り値の文字列を調べる。問題がなければ null、あれば説明（messages.js の言語）
   function checkReturnValue(s) {
     if (typeof s !== 'string') return M.rvNotString;
     var t = s.trim();
@@ -7201,13 +7174,11 @@ window.PT_MSG = {
     return null;
   }
 
-  // 比べやすい形にする（「;」の前後の空白をそろえる）
   function normalizeValue(s) {
     return String(s).trim().split(';').map(function (x) { return x.trim().replace(/\s+/g, ' '); })
       .filter(function (x) { return x; }).join('; ');
   }
 
-  // 色分けの種類: direct / proxy / proxy-direct（プロキシ→だめなら直接）/ socks / invalid / error
   function classifyResult(r) {
     if (!r) return 'pending';
     if (!r.ok) return r.timeout ? 'timeout' : 'error';
@@ -7220,7 +7191,6 @@ window.PT_MSG = {
     return hasDirect ? 'proxy-direct' : 'proxy';
   }
 
-  // 結果を 1 つの文字列にする（表示・差分・CSV 用）
   function resultText(r) {
     if (!r) return '';
     if (!r.ok) return r.timeout ? M.resTimeout : M.resError + (r.error || '');
@@ -7228,8 +7198,6 @@ window.PT_MSG = {
     return normalizeValue(r.value);
   }
 
-  // ---------- 差分 ----------
-  // resultsA・resultsB は URL の順に並んだ評価結果。返り値は URL ごとの { changed, a, b }
   function diffResults(urls, resultsA, resultsB) {
     var rows = [];
     var changed = 0;
@@ -7242,10 +7210,8 @@ window.PT_MSG = {
     return { rows: rows, changed: changed };
   }
 
-  // ---------- CSV ----------
   function csvField(v) {
     var s = v === undefined || v === null ? '' : String(v);
-    // 表計算ソフトで式として読まれないようにする
     if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
     return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
@@ -7253,15 +7219,12 @@ window.PT_MSG = {
     return [header].concat(rows).map(function (r) { return r.map(csvField).join(','); }).join('\r\n') + '\r\n';
   }
 
-  // ---------- shExpMatch のパターン（* と ?）どうしの包含 ----------
   function normalizeGlob(p) {
     var s = String(p).replace(/\*+/g, '*');
-    // 「*?」と「?*」は同じ意味なので、? を前に寄せる
     var prev;
     do { prev = s; s = s.replace(/\*\?/g, '?*').replace(/\*+/g, '*'); } while (s !== prev);
     return s;
   }
-  // p1 が p2 を含む（p2 に当てはまる文字列は、必ず p1 にも当てはまる）なら true。近似（true と言えるときだけ true）
   function globCovers(p1, p2) {
     var a = normalizeGlob(p1), b = normalizeGlob(p2);
     var memo = {};
@@ -7282,7 +7245,6 @@ window.PT_MSG = {
     return m(0, 0);
   }
 
-  // ---------- 文字列・コメントの位置と、括弧の対応（構文エラーがあっても動く簡易な読み取り） ----------
   var REGEX_AFTER_WORD = { 'return': 1, 'typeof': 1, 'case': 1, 'do': 1, 'else': 1, 'in': 1, 'of': 1, 'new': 1, 'delete': 1, 'void': 1, 'throw': 1, 'instanceof': 1 };
   function scanSource(code) {
     var regions = [];
@@ -7290,7 +7252,7 @@ window.PT_MSG = {
     var bracketIssues = [];
     var n = code.length;
     var i = 0;
-    var last = '';           // 直前の意味のある記号か単語（/ が割り算か正規表現かの判断用）
+    var last = '';
     var mismatch = false;
     var PAIR = { ')': '(', ']': '[', '}': '{' };
     while (i < n) {
@@ -7386,7 +7348,6 @@ window.PT_MSG = {
     return { line: lo + 1, col: pos - starts[lo] + 1 };
   }
 
-  // ---------- 構文エラーの説明（acorn の英語のメッセージを、messages.js の文言にする） ----------
   function translateSyntaxError(msg, atEnd) {
     var m = String(msg).replace(/\s*\(\d+:\d+\)\s*$/, '');
     var r;
@@ -7408,7 +7369,6 @@ window.PT_MSG = {
     return fmt(M.synOther, { msg: m });
   }
 
-  // ---------- 構文木の読み取り ----------
   function children(node) {
     var out = [];
     for (var k in node) {
@@ -7424,7 +7384,6 @@ window.PT_MSG = {
   function isFunctionNode(n) {
     return n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression';
   }
-  // すべてのノードを訪れる（intoFunctions が false なら、中の関数には入らない）
   function walk(node, fn, intoFunctions, isRoot) {
     if (!node) return;
     fn(node);
@@ -7432,7 +7391,6 @@ window.PT_MSG = {
     children(node).forEach(function (c) { walk(c, fn, intoFunctions, false); });
   }
 
-  // break で抜ける可能性（ループ・switch の中の break。ラベル付きは近似）
   function containsBreak(node) {
     var found = false;
     (function visit(n, depth) {
@@ -7445,7 +7403,6 @@ window.PT_MSG = {
     return found;
   }
 
-  // この文を実行すると、必ず return か throw で抜けるか（最後まで落ちないか）
   function terminates(s) {
     if (!s) return false;
     switch (s.type) {
@@ -7485,7 +7442,6 @@ window.PT_MSG = {
     return null;
   }
 
-  // shExpMatch などの第 1 引数が何か（url・host・そのほかの変数名）
   function argRole(n, params) {
     if (!n) return null;
     if (n.type === 'CallExpression' && n.callee.type === 'MemberExpression' && !n.arguments.length &&
@@ -7521,7 +7477,6 @@ window.PT_MSG = {
   };
   var WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-  // if の条件が「shExpMatch(host, "P") || dnsDomainIs(host, ".d") || host == "h"」の形なら、パターンの一覧にする
   function simpleClauses(test, params) {
     if (!test) return null;
     if (test.type === 'LogicalExpression' && test.operator === '||') {
@@ -7564,8 +7519,6 @@ window.PT_MSG = {
     return hit;
   }
 
-  // ---------- lint 本体 ----------
-  // 返り値: { issues: [{ severity: 'error'|'warning'|'info', line, col, message }], patterns: [{ line, col, role, pattern, notes }], parsed }
   function lint(code, acorn) {
     code = String(code || '');
     var issues = [];
@@ -7582,7 +7535,6 @@ window.PT_MSG = {
       return finish();
     }
 
-    // 1. 全角文字（コメントの中は問題なし。文字列の中は警告。コードの中はエラー）
     var scan = scanSource(code);
     var regionAt = [];
     scan.regions.forEach(function (r) { regionAt.push(r); });
@@ -7605,7 +7557,6 @@ window.PT_MSG = {
       }
     }
 
-    // 2. 括弧と引用符の対応
     scan.regions.forEach(function (r) {
       if (r.unterminated && r.type === 'string') add('error', r.start, fmt(M.quoteOpen, { q: r.quote }), 'quote');
       if (r.unterminated && r.type === 'comment') add('error', r.start, M.synComment, 'comment');
@@ -7618,7 +7569,6 @@ window.PT_MSG = {
       } else add('error', b.pos, fmt(M.bracketOpen, { ch: b.ch }), 'bracket');
     });
 
-    // 3. 構文（acorn）
     var ast = null;
     try {
       ast = acorn.parse(code, { ecmaVersion: 2022, sourceType: 'script', locations: true, allowReturnOutsideFunction: false });
@@ -7629,7 +7579,6 @@ window.PT_MSG = {
       return finish();
     }
 
-    // 4. FindProxyForURL
     var entries = findEntry(ast);
     if (!entries.length) {
       add('error', null, M.noEntry, 'no-entry');
@@ -7650,13 +7599,11 @@ window.PT_MSG = {
       if (fn.params[1] && fn.params[1].type === 'Identifier') params.host = fn.params[1].name;
       if (fn.async || fn.generator) add('error', nodeLoc(fn), M.asyncFn, 'params');
 
-      // 5. 最後の return
       var body = fn.body;
       if (body.type === 'BlockStatement' && !terminates(body)) {
         add('warning', { line: body.loc.end.line, col: body.loc.end.column }, M.noReturn, 'no-return');
       }
 
-      // 6. return の値の形
       walk(body, function (n) {
         if (n.type !== 'ReturnStatement') return;
         if (!n.argument) { add('warning', nodeLoc(n), M.emptyReturn, 'return-value'); return; }
@@ -7668,7 +7615,6 @@ window.PT_MSG = {
       }, false, true);
     }
 
-    // 7. ヘルパー関数の呼び方と、shExpMatch のパターン
     walk(ast, function (n) {
       if (n.type === 'FunctionDeclaration' && n.id && n.id.name !== 'FindProxyForURL' && (HELPER_ARGS[n.id.name] !== undefined || /^(weekdayRange|dateRange|timeRange|alert)$/.test(n.id.name))) {
         add('info', nodeLoc(n), fmt(M.override, { name: n.id.name }), 'override');
@@ -7720,7 +7666,6 @@ window.PT_MSG = {
       }
     }, true, true);
 
-    // 8. ルールの隠れ（上のパターンが下のパターンを完全に含んでいる）
     if (fn && fn.body.type === 'BlockStatement') shadowCheck(fn.body.body, params, add);
 
     return finish();
@@ -7750,7 +7695,6 @@ window.PT_MSG = {
     return (inv & (inv + 1)) === 0;
   }
 
-  // shExpMatch のパターンの、明らかな誤り
   function shExpNotes(role, p) {
     var notes = [];
     var baseRole = role ? role.replace(/\.to(Lower|Upper)Case$/, '') : role;
@@ -7778,11 +7722,11 @@ window.PT_MSG = {
   }
 
   function shadowCheck(stmts, params, add) {
-    var active = [];   // これまでの if で「当てはまったら必ず return する」パターン
+    var active = [];
     var roles = [params.url, params.host].filter(Boolean);
     stmts.forEach(function (s) {
       if (s.type !== 'IfStatement') {
-        if (assignsTo(s, roles)) active = [];   // url・host を書き換えたら、ここまでの比較は使わない
+        if (assignsTo(s, roles)) active = [];
         return;
       }
       var chain = [];
@@ -7791,7 +7735,7 @@ window.PT_MSG = {
         chain.push(cur);
         cur = cur.alternate;
       }
-      var local = [];    // 同じ if〜else if の中の、上の条件（return しなくても下には来ない）
+      var local = [];
       chain.forEach(function (st) {
         var clauses = simpleClauses(st.test, params);
         if (!clauses) return;
@@ -7842,18 +7786,10 @@ window.PT_MSG = {
 });
 
 </script>
-<script>/* PAC ファイル テスター: 隔離用の枠（sandbox.html・pac-runtime.js・worker.js） | MIT */
-window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003chead>\n\u003cmeta charset=\"UTF-8\">\n\u003c!-- PAC を評価するための隔離用の枠（iframe sandbox=\"allow-scripts\" の srcdoc。オリジンは null）。\n     通信・画像・フォームはすべて禁止。Worker は、この枠で作った Blob からだけ起動できる -->\n\u003cmeta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; form-action 'none'; base-uri 'none'\">\n\u003ctitle>PAC ファイル テスター\u003c/title>\n\u003c/head>\n\u003cbody>\n\u003cscript>\n// ===========================\n// PAC ファイル テスター — 隔離用の枠の中の制御（ページ本体とは postMessage だけでやりとりする）\n// 1. 本体から { type: 'run', pacs, urls, cfg, msg } を受け取る（msg は messages.js の sandbox。この枠には言語ごとの文言を置かない）\n// 2. PAC ごとに Worker を起動し（pac-runtime.js・worker.js・PAC をつなげた Blob）、URL を 1 件ずつ評価させる\n// 3. 1 件が timeoutMs を超えたら Worker を止めて（terminate）作り直し、次の URL へ進む\n// ===========================\n(function () {\n  'use strict';\n  var RUNTIME_SRC = \"// ===========================\\n// PAC ファイル テスター — PAC の標準ヘルパー関数（isInNet・shExpMatch など）\\n// Node のテスト（require）と、PAC を評価する Worker（文字列として埋め込む）の両方で使う\\n// 画面・通信には触れない純粋な関数だけを置く\\n//\\n// ふるまいは Firefox・Chromium の PAC の実装（どちらも Netscape の元の実装を引き継いだもの）に合わせている。\\n// 違うところは guide.html の「ヘルパー関数の一覧と注意点」に書いた\\n//   - shExpMatch: 使える記号は * と ? だけ（ブラウザの実装では [ ] や + などが正規表現として効いてしまうが、ここでは文字として扱う）\\n//   - dateRange: 終わりに月だけを書いたとき、その月の末日までとする（ブラウザの実装では 31 日のない月で数日ずれる）\\n//   - 時刻: 「評価に使う日時」と「UTC との時差」を設定で決める（実行している端末の時計は使わない）\\n// ===========================\\n(function (root, factory) {\\n  if (typeof module === 'object' && module.exports) module.exports = factory();\\n  else root.PacRuntime = factory();\\n})(typeof self !== 'undefined' ? self : this, function () {\\n  'use strict';\\n\\n  var WDAYS = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };\\n  var MONTHS = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };\\n  var IPV4 = /^(\\\\d+)\\\\.(\\\\d+)\\\\.(\\\\d+)\\\\.(\\\\d+)$/;\\n\\n  function isValidIpAddress(s) {\\n    var m = IPV4.exec(String(s));\\n    if (!m) return false;\\n    for (var i = 1; i \\u003c= 4; i++) if (Number(m[i]) > 255) return false;\\n    return true;\\n  }\\n\\n  // shExpMatch のパターンを正規表現にする（* は 0 文字以上、? は 1 文字。ほかの記号は文字そのもの）\\n  function globToRegExp(pattern) {\\n    var src = String(pattern).replace(/[.+^${}()|[\\\\]\\\\\\\\\\\\/]/g, '\\\\\\\\$&').replace(/\\\\*/g, '.*').replace(/\\\\?/g, '.');\\n    return new RegExp('^' + src + '$');\\n  }\\n\\n  // ホスト名→IP の対応表を作る。キーは小文字。\\\"*.example.com\\\" のように先頭の \\\"*.\\\" で下のホストすべてにも当てられる\\n  function makeResolver(hosts) {\\n    var exact = Object.create(null);\\n    var wild = [];\\n    Object.keys(hosts || {}).forEach(function (k) {\\n      var name = k.trim().toLowerCase().replace(/\\\\.$/, '');\\n      var ip = String(hosts[k]).trim();\\n      if (!name || !ip) return;\\n      if (name.indexOf('*.') === 0) wild.push({ suffix: name.slice(1), ip: ip });\\n      else exact[name] = ip;\\n    });\\n    wild.sort(function (a, b) { return b.suffix.length - a.suffix.length; });\\n    return function (host) {\\n      if (host === null || host === undefined) return null;\\n      var h = String(host).trim().toLowerCase().replace(/\\\\.$/, '');\\n      if (isValidIpAddress(h)) return h;               // IP アドレスはそのまま\\n      if (/^\\\\[?[0-9a-f:]+\\\\]?$/.test(h) && h.indexOf(':') >= 0) return null; // IPv6 は扱わない\\n      if (h === 'localhost') return exact.localhost || '127.0.0.1';\\n      if (exact[h]) return exact[h];\\n      for (var i = 0; i \\u003c wild.length; i++) {\\n        if (h.length > wild[i].suffix.length && h.slice(-wild[i].suffix.length) === wild[i].suffix) return wild[i].ip;\\n      }\\n      return null;                                     // 対応表にないホストは「解決できない」\\n    };\\n  }\\n\\n  // 日時: nowMs（UTC のミリ秒）と tzOffsetMin（UTC との時差・分。日本は 540）から、\\n  // 「その地域の壁時計」を UTC の Date として表す（getUTC* で読む）\\n  function wallClock(nowMs, tzOffsetMin, gmt) {\\n    return new Date(nowMs + (gmt ? 0 : tzOffsetMin * 60000));\\n  }\\n  function lastDay(year, month) {\\n    return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();\\n  }\\n\\n  function create(cfg) {\\n    cfg = cfg || {};\\n    var resolve = makeResolver(cfg.hosts);\\n    var myIp = cfg.myIp && isValidIpAddress(cfg.myIp) ? String(cfg.myIp) : '127.0.0.1';\\n    var tz = typeof cfg.tzOffsetMin === 'number' && isFinite(cfg.tzOffsetMin) ? cfg.tzOffsetMin : 0;\\n    var alerts = [];\\n    var regexCache = Object.create(null);\\n\\n    function nowMs() {\\n      return typeof cfg.nowMs === 'number' && isFinite(cfg.nowMs) ? cfg.nowMs : Date.now();\\n    }\\n    function lastIsGmt(args) {\\n      return args.length > 0 && args[args.length - 1] === 'GMT';\\n    }\\n\\n    var h = {};\\n\\n    // ホスト名にドットが無い（例: intranet）。IPv6 アドレス（: を含む）も「ドット無し」とはしない\\n    h.isPlainHostName = function (host) {\\n      return String(host).search(/\\\\.|:/) === -1;\\n    };\\n\\n    // host が domain で終わる（大文字・小文字は区別する。ブラウザと同じ）\\n    h.dnsDomainIs = function (host, domain) {\\n      host = String(host); domain = String(domain);\\n      return host.length >= domain.length && host.substring(host.length - domain.length) === domain;\\n    };\\n\\n    // host が hostdom と同じか、ドメイン無しで hostdom の先頭部分と同じ\\n    h.localHostOrDomainIs = function (host, hostdom) {\\n      host = String(host); hostdom = String(hostdom);\\n      return host === hostdom || hostdom.lastIndexOf(host + '.', 0) === 0;\\n    };\\n\\n    h.isResolvable = function (host) {\\n      return resolve(host) !== null;\\n    };\\n\\n    h.dnsResolve = function (host) {\\n      return resolve(host);\\n    };\\n\\n    h.myIpAddress = function () {\\n      return myIp;\\n    };\\n\\n    // ドットの数（www.example.com → 2）\\n    h.dnsDomainLevels = function (host) {\\n      return String(host).split('.').length - 1;\\n    };\\n\\n    // IP アドレスを 32 ビットの整数にする（ブラウザと同じく符号付き）\\n    h.convert_addr = function (ipchars) {\\n      var b = String(ipchars).split('.');\\n      return ((b[0] & 0xff) \\u003c\\u003c 24) | ((b[1] & 0xff) \\u003c\\u003c 16) | ((b[2] & 0xff) \\u003c\\u003c 8) | (b[3] & 0xff);\\n    };\\n\\n    // ホスト名を渡したときは、対応表で IP アドレスにしてから比べる（解決できなければ false）\\n    h.isInNet = function (ipaddr, pattern, maskstr) {\\n      if (!isValidIpAddress(pattern) || !isValidIpAddress(maskstr)) return false;\\n      if (!isValidIpAddress(ipaddr)) {\\n        ipaddr = resolve(ipaddr);\\n        if (ipaddr === null) return false;\\n      }\\n      var host = h.convert_addr(ipaddr);\\n      var pat = h.convert_addr(pattern);\\n      var mask = h.convert_addr(maskstr);\\n      return (host & mask) === (pat & mask);\\n    };\\n\\n    // * は 0 文字以上、? は 1 文字。全体が一致したときだけ true（大文字・小文字は区別する）\\n    h.shExpMatch = function (str, pattern) {\\n      var key = String(pattern);\\n      var re = regexCache[key] || (regexCache[key] = globToRegExp(key));\\n      return re.test(String(str));\\n    };\\n\\n    // weekdayRange(\\\"MON\\\", \\\"FRI\\\") / weekdayRange(\\\"SAT\\\") / 最後に \\\"GMT\\\" で UTC の曜日\\n    h.weekdayRange = function () {\\n      var args = Array.prototype.slice.call(arguments);\\n      var gmt = lastIsGmt(args);\\n      if (gmt) args.pop();\\n      if (args.length \\u003c 1) return false;\\n      var wday = wallClock(nowMs(), tz, gmt).getUTCDay();\\n      var d1 = args[0] in WDAYS ? WDAYS[args[0]] : -1;\\n      var d2 = args.length >= 2 ? (args[1] in WDAYS ? WDAYS[args[1]] : -1) : d1;\\n      if (d1 === -1 || d2 === -1) return false;\\n      if (d1 \\u003c= d2) return d1 \\u003c= wday && wday \\u003c= d2;\\n      return d2 >= wday || wday >= d1;                  // FRI〜MON のような、週をまたぐ指定\\n    };\\n\\n    // dateRange(日) / dateRange(\\\"月\\\") / dateRange(年) / dateRange(日1, 日2) / dateRange(\\\"月1\\\", \\\"月2\\\") /\\n    // dateRange(日, \\\"月\\\", 日, \\\"月\\\") / dateRange(\\\"月\\\", 年, \\\"月\\\", 年) / dateRange(日, \\\"月\\\", 年, 日, \\\"月\\\", 年)\\n    h.dateRange = function () {\\n      var args = Array.prototype.slice.call(arguments);\\n      var gmt = lastIsGmt(args);\\n      if (gmt) args.pop();\\n      var argc = args.length;\\n      if (argc \\u003c 1) return false;\\n      var now = wallClock(nowMs(), tz, gmt);\\n      var cy = now.getUTCFullYear(), cm = now.getUTCMonth(), cd = now.getUTCDate();\\n      if (argc === 1) {\\n        var v = parseInt(args[0], 10);\\n        if (isNaN(v)) return cm === (args[0] in MONTHS ? MONTHS[args[0]] : -1);\\n        if (v \\u003c 32) return cd === v;\\n        return cy === v;\\n      }\\n      function side(list) {\\n        var s = {};\\n        list.forEach(function (a) {\\n          var v = parseInt(a, 10);\\n          if (isNaN(v)) s.m = a in MONTHS ? MONTHS[a] : -1;\\n          else if (v \\u003c 32) s.d = v;\\n          else s.y = v;\\n        });\\n        return s;\\n      }\\n      var half = argc >> 1;\\n      var a = side(args.slice(0, half));\\n      var b = side(args.slice(half));\\n      if (a.m === -1 || b.m === -1) return false;\\n      // 日だけを 2 つ指定したときは、今月の中の範囲\\n      if (argc === 2 && a.d !== undefined && b.d !== undefined) { a.m = cm; b.m = cm; }\\n      var y1 = a.y !== undefined ? a.y : cy;\\n      var m1 = a.m !== undefined ? a.m : 0;\\n      var y2 = b.y !== undefined ? b.y : cy;\\n      var m2 = b.m !== undefined ? b.m : 11;\\n      var start = Date.UTC(y1, m1, a.d !== undefined ? a.d : 1, 0, 0, 0);\\n      var end = Date.UTC(y2, m2, b.d !== undefined ? b.d : lastDay(y2, m2), 23, 59, 59);\\n      var t = Math.floor(now.getTime() / 1000) * 1000;\\n      if (start \\u003c= end) return start \\u003c= t && t \\u003c= end;\\n      return t \\u003c= end || t >= start;                    // 年末年始をまたぐ指定（例: \\\"DEC\\\", \\\"JAN\\\"）\\n    };\\n\\n    // timeRange(時) / timeRange(時1, 時2) / timeRange(時1, 分1, 時2, 分2) / timeRange(時1, 分1, 秒1, 時2, 分2, 秒2)\\n    // 時を 2 つ書く形は「時1 ≤ 今の時 ≤ 時2」で、日をまたがない（ブラウザと同じ。timeRange(22, 6) は常に false）\\n    h.timeRange = function () {\\n      var args = Array.prototype.slice.call(arguments);\\n      var gmt = lastIsGmt(args);\\n      if (gmt) args.pop();\\n      var argc = args.length;\\n      if (argc \\u003c 1) return false;\\n      var now = wallClock(nowMs(), tz, gmt);\\n      var hour = now.getUTCHours();\\n      var n = args.map(function (x) { return Number(x); });\\n      if (argc === 1) return hour === n[0];\\n      if (argc === 2) return n[0] \\u003c= hour && hour \\u003c= n[1];\\n      var sec = hour * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();\\n      var s1, s2;\\n      if (argc === 4) { s1 = n[0] * 3600 + n[1] * 60; s2 = n[2] * 3600 + n[3] * 60 + 59; }\\n      else if (argc === 6) { s1 = n[0] * 3600 + n[1] * 60 + n[2]; s2 = n[3] * 3600 + n[4] * 60 + n[5]; }\\n      else throw new Error((cfg.msg && cfg.msg.timeRangeArgs) || 'timeRange: wrong number of arguments (1, 2, 4 or 6)');\\n      if (s1 \\u003c= s2) return s1 \\u003c= sec && sec \\u003c= s2;\\n      return sec \\u003c= s2 || sec >= s1;                    // 22:00〜06:00 のような、日をまたぐ指定\\n    };\\n\\n    h.alert = function (msg) {\\n      if (alerts.length \\u003c 50) alerts.push(String(msg).slice(0, 500));\\n    };\\n\\n    return {\\n      helpers: h,\\n      takeAlerts: function () { var a = alerts.slice(); alerts.length = 0; return a; }\\n    };\\n  }\\n\\n  var HELPER_NAMES = ['isPlainHostName', 'dnsDomainIs', 'localHostOrDomainIs', 'isResolvable', 'isInNet',\\n    'dnsResolve', 'convert_addr', 'myIpAddress', 'dnsDomainLevels', 'shExpMatch', 'weekdayRange',\\n    'dateRange', 'timeRange', 'alert'];\\n\\n  return {\\n    create: create,\\n    HELPER_NAMES: HELPER_NAMES,\\n    isValidIpAddress: isValidIpAddress,\\n    globToRegExp: globToRegExp\\n  };\\n});\\n\";\n  var WORKER_SRC = \"// ===========================\\n// PAC ファイル テスター — PAC を評価する Worker の中で動く部分\\n// 隔離用の枠（sandbox.html）が、pac-runtime.js・設定（__PT_CFG）・このファイル・ユーザーの PAC を\\n// つなげて 1 つの Blob にし、Worker として起動する。ページ本体（pac-tester.html）とは別のオリジン（null）で動く\\n// 文言は設定の msg（messages.js の worker）で受け取る\\n// ===========================\\nvar __pt = PacRuntime.create(__PT_CFG);\\n\\n// ヘルパー関数を PAC から呼べるようにする。PAC の中に同じ名前の関数が書いてあれば、そちらを優先する（ブラウザと同じ）\\nPacRuntime.HELPER_NAMES.forEach(function (name) {\\n  if (typeof self[name] !== 'function') self[name] = __pt.helpers[name];\\n});\\n\\nself.onmessage = function (e) {\\n  var d = e.data || {};\\n  if (d.type !== 'eval') return;\\n  var out = { type: 'result', id: d.id };\\n  var t0 = Date.now();\\n  try {\\n    if (typeof FindProxyForURL !== 'function') throw new Error((__PT_CFG.msg && __PT_CFG.msg.noEntry) || 'FindProxyForURL is not defined');\\n    var v = FindProxyForURL(d.url, d.host);\\n    out.ok = true;\\n    out.valueType = v === null ? 'null' : typeof v;\\n    out.value = typeof v === 'string' ? v : String(v);\\n  } catch (err) {\\n    out.ok = false;\\n    out.error = err && err.name && err.message ? err.name + ': ' + err.message : String(err);\\n  }\\n  out.ms = Date.now() - t0;\\n  out.alerts = __pt.takeAlerts();\\n  self.postMessage(out);\\n};\\n\";\n  var parentWin = window.parent;\n\n  var job = null;\n  var worker = null;\n  var blobUrl = null;\n  var timer = null;\n  var seq = 0;\n\n  function send(m) { parentWin.postMessage(m, '*'); }\n\n  // 本体から受け取った文言に値を差し込む\n  function t(j, key, vars) {\n    var s = String((j.msg && j.msg[key]) || key);\n    return s.replace(/\\{(\\w+)\\}/g, function (m, k) {\n      return vars && Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : m;\n    });\n  }\n\n  function stopWorker() {\n    clearTimeout(timer);\n    if (worker) { worker.onmessage = null; worker.onerror = null; worker.terminate(); worker = null; }\n    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }\n  }\n\n  function lineCount(s) { return s.split('\\n').length - 1; }\n\n  // PAC を読み込んだ Worker を起動する。PAC の関数の外のコードもここで実行される\n  function boot(j, pac, onReady, onFail) {\n    stopWorker();\n    var head = RUNTIME_SRC + '\\nvar __PT_CFG = ' + JSON.stringify(j.cfg) + ';\\n' + WORKER_SRC + '\\n';\n    var offset = lineCount(head);\n    var src = head + pac.code + '\\n;self.postMessage({ type: \"ready\" });\\n';\n    blobUrl = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));\n    var w;\n    try {\n      w = new Worker(blobUrl);\n    } catch (e) {\n      onFail(t(j, 'workerBoot', { msg: e && e.message }));\n      return;\n    }\n    worker = w;\n    var settled = false;\n    timer = setTimeout(function () {\n      if (settled || w !== worker) return;\n      settled = true;\n      stopWorker();\n      onFail(t(j, 'loadTimeout', { ms: j.loadTimeoutMs }));\n    }, j.loadTimeoutMs);\n    w.onmessage = function (ev) {\n      if (w !== worker) return;\n      var m = ev.data || {};\n      if (!settled && m.type === 'ready') {\n        settled = true;\n        clearTimeout(timer);\n        onReady();\n      } else if (settled && m.type === 'result') {\n        onResult(m);\n      }\n    };\n    w.onerror = function (ev) {\n      if (ev && ev.preventDefault) ev.preventDefault();\n      if (w !== worker || settled) return;\n      settled = true;\n      stopWorker();\n      var line = ev && ev.lineno ? ev.lineno - offset : 0;\n      onFail(t(j, 'loadFail', { line: line > 0 ? t(j, 'loadFailLine', { line: line }) : '', msg: (ev && ev.message) || t(j, 'syntaxError') }));\n    };\n  }\n\n  var pending = null;   // 評価中の 1 件 { id, index }\n\n  function runPac() {\n    var j = job;\n    if (!j) return;\n    if (j.pi >= j.pacs.length) {\n      send({ type: 'done', jobId: j.id });\n      job = null;\n      stopWorker();\n      return;\n    }\n    var pac = j.pacs[j.pi];\n    j.ui = 0;\n    boot(j, pac, function () { nextUrl(); }, function (msg) {\n      if (job !== j) return;\n      send({ type: 'load-error', jobId: j.id, key: pac.key, message: msg });\n      j.pi++;\n      runPac();\n    });\n  }\n\n  function nextUrl() {\n    var j = job;\n    if (!j) return;\n    if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }\n    var u = j.urls[j.ui];\n    var id = ++seq;\n    pending = { id: id, index: j.ui, t0: Date.now() };\n    worker.postMessage({ type: 'eval', id: id, url: u.url, host: u.host });\n    timer = setTimeout(function () { onTimeout(j, id); }, j.timeoutMs);\n  }\n\n  function onResult(m) {\n    var j = job;\n    if (!j || !pending || m.id !== pending.id) return;\n    clearTimeout(timer);\n    var p = pending;\n    pending = null;\n    send({\n      type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index,\n      ok: !!m.ok, value: m.value, valueType: m.valueType, error: m.error, alerts: m.alerts || [], ms: m.ms\n    });\n    j.ui++;\n    nextUrl();\n  }\n\n  function onTimeout(j, id) {\n    if (job !== j || !pending || pending.id !== id) return;\n    var p = pending;\n    pending = null;\n    stopWorker();                           // 無限ループしている Worker をここで止める\n    send({ type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index, ok: false, timeout: true,\n      error: t(j, 'evalTimeout', { ms: j.timeoutMs }), alerts: [], ms: Date.now() - p.t0 });\n    j.ui++;\n    if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }\n    var pac = j.pacs[j.pi];\n    boot(j, pac, function () { nextUrl(); }, function (msg) {\n      if (job !== j) return;\n      send({ type: 'load-error', jobId: j.id, key: pac.key, message: msg, fromIndex: j.ui });\n      j.pi++;\n      runPac();\n    });\n  }\n\n  window.addEventListener('message', function (e) {\n    if (e.source !== parentWin) return;\n    var d = e.data || {};\n    if (d.type === 'run') {\n      stopWorker();\n      pending = null;\n      job = {\n        id: d.jobId, pacs: d.pacs || [], urls: d.urls || [], cfg: d.cfg || {}, msg: d.msg || {},\n        timeoutMs: d.timeoutMs || 200, loadTimeoutMs: d.loadTimeoutMs || 1000, pi: 0, ui: 0\n      };\n      runPac();\n    } else if (d.type === 'cancel') {\n      stopWorker();\n      pending = null;\n      job = null;\n    }\n  });\n\n  send({ type: 'hello' });\n})();\n\u003c/script>\n\u003c/body>\n\u003c/html>\n";
+<script>/* PAC File Tester: sandbox (sandbox.html, pac-runtime.js, worker.js) | MIT */
+window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"en\">\n\u003chead>\n\u003cmeta charset=\"UTF-8\">\n\u003cmeta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; form-action 'none'; base-uri 'none'\">\n\u003ctitle>PAC File Tester\u003c/title>\n\u003c/head>\n\u003cbody>\n\u003cscript>\n(function () {\n  'use strict';\n  var RUNTIME_SRC = \"(function (root, factory) {\\n  if (typeof module === 'object' && module.exports) module.exports = factory();\\n  else root.PacRuntime = factory();\\n})(typeof self !== 'undefined' ? self : this, function () {\\n  'use strict';\\n\\n  var WDAYS = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };\\n  var MONTHS = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };\\n  var IPV4 = /^(\\\\d+)\\\\.(\\\\d+)\\\\.(\\\\d+)\\\\.(\\\\d+)$/;\\n\\n  function isValidIpAddress(s) {\\n    var m = IPV4.exec(String(s));\\n    if (!m) return false;\\n    for (var i = 1; i \\u003c= 4; i++) if (Number(m[i]) > 255) return false;\\n    return true;\\n  }\\n\\n  function globToRegExp(pattern) {\\n    var src = String(pattern).replace(/[.+^${}()|[\\\\]\\\\\\\\\\\\/]/g, '\\\\\\\\$&').replace(/\\\\*/g, '.*').replace(/\\\\?/g, '.');\\n    return new RegExp('^' + src + '$');\\n  }\\n\\n  function makeResolver(hosts) {\\n    var exact = Object.create(null);\\n    var wild = [];\\n    Object.keys(hosts || {}).forEach(function (k) {\\n      var name = k.trim().toLowerCase().replace(/\\\\.$/, '');\\n      var ip = String(hosts[k]).trim();\\n      if (!name || !ip) return;\\n      if (name.indexOf('*.') === 0) wild.push({ suffix: name.slice(1), ip: ip });\\n      else exact[name] = ip;\\n    });\\n    wild.sort(function (a, b) { return b.suffix.length - a.suffix.length; });\\n    return function (host) {\\n      if (host === null || host === undefined) return null;\\n      var h = String(host).trim().toLowerCase().replace(/\\\\.$/, '');\\n      if (isValidIpAddress(h)) return h;\\n      if (/^\\\\[?[0-9a-f:]+\\\\]?$/.test(h) && h.indexOf(':') >= 0) return null;\\n      if (h === 'localhost') return exact.localhost || '127.0.0.1';\\n      if (exact[h]) return exact[h];\\n      for (var i = 0; i \\u003c wild.length; i++) {\\n        if (h.length > wild[i].suffix.length && h.slice(-wild[i].suffix.length) === wild[i].suffix) return wild[i].ip;\\n      }\\n      return null;\\n    };\\n  }\\n\\n  function wallClock(nowMs, tzOffsetMin, gmt) {\\n    return new Date(nowMs + (gmt ? 0 : tzOffsetMin * 60000));\\n  }\\n  function lastDay(year, month) {\\n    return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();\\n  }\\n\\n  function create(cfg) {\\n    cfg = cfg || {};\\n    var resolve = makeResolver(cfg.hosts);\\n    var myIp = cfg.myIp && isValidIpAddress(cfg.myIp) ? String(cfg.myIp) : '127.0.0.1';\\n    var tz = typeof cfg.tzOffsetMin === 'number' && isFinite(cfg.tzOffsetMin) ? cfg.tzOffsetMin : 0;\\n    var alerts = [];\\n    var regexCache = Object.create(null);\\n\\n    function nowMs() {\\n      return typeof cfg.nowMs === 'number' && isFinite(cfg.nowMs) ? cfg.nowMs : Date.now();\\n    }\\n    function lastIsGmt(args) {\\n      return args.length > 0 && args[args.length - 1] === 'GMT';\\n    }\\n\\n    var h = {};\\n\\n    h.isPlainHostName = function (host) {\\n      return String(host).search(/\\\\.|:/) === -1;\\n    };\\n\\n    h.dnsDomainIs = function (host, domain) {\\n      host = String(host); domain = String(domain);\\n      return host.length >= domain.length && host.substring(host.length - domain.length) === domain;\\n    };\\n\\n    h.localHostOrDomainIs = function (host, hostdom) {\\n      host = String(host); hostdom = String(hostdom);\\n      return host === hostdom || hostdom.lastIndexOf(host + '.', 0) === 0;\\n    };\\n\\n    h.isResolvable = function (host) {\\n      return resolve(host) !== null;\\n    };\\n\\n    h.dnsResolve = function (host) {\\n      return resolve(host);\\n    };\\n\\n    h.myIpAddress = function () {\\n      return myIp;\\n    };\\n\\n    h.dnsDomainLevels = function (host) {\\n      return String(host).split('.').length - 1;\\n    };\\n\\n    h.convert_addr = function (ipchars) {\\n      var b = String(ipchars).split('.');\\n      return ((b[0] & 0xff) \\u003c\\u003c 24) | ((b[1] & 0xff) \\u003c\\u003c 16) | ((b[2] & 0xff) \\u003c\\u003c 8) | (b[3] & 0xff);\\n    };\\n\\n    h.isInNet = function (ipaddr, pattern, maskstr) {\\n      if (!isValidIpAddress(pattern) || !isValidIpAddress(maskstr)) return false;\\n      if (!isValidIpAddress(ipaddr)) {\\n        ipaddr = resolve(ipaddr);\\n        if (ipaddr === null) return false;\\n      }\\n      var host = h.convert_addr(ipaddr);\\n      var pat = h.convert_addr(pattern);\\n      var mask = h.convert_addr(maskstr);\\n      return (host & mask) === (pat & mask);\\n    };\\n\\n    h.shExpMatch = function (str, pattern) {\\n      var key = String(pattern);\\n      var re = regexCache[key] || (regexCache[key] = globToRegExp(key));\\n      return re.test(String(str));\\n    };\\n\\n    h.weekdayRange = function () {\\n      var args = Array.prototype.slice.call(arguments);\\n      var gmt = lastIsGmt(args);\\n      if (gmt) args.pop();\\n      if (args.length \\u003c 1) return false;\\n      var wday = wallClock(nowMs(), tz, gmt).getUTCDay();\\n      var d1 = args[0] in WDAYS ? WDAYS[args[0]] : -1;\\n      var d2 = args.length >= 2 ? (args[1] in WDAYS ? WDAYS[args[1]] : -1) : d1;\\n      if (d1 === -1 || d2 === -1) return false;\\n      if (d1 \\u003c= d2) return d1 \\u003c= wday && wday \\u003c= d2;\\n      return d2 >= wday || wday >= d1;\\n    };\\n\\n    h.dateRange = function () {\\n      var args = Array.prototype.slice.call(arguments);\\n      var gmt = lastIsGmt(args);\\n      if (gmt) args.pop();\\n      var argc = args.length;\\n      if (argc \\u003c 1) return false;\\n      var now = wallClock(nowMs(), tz, gmt);\\n      var cy = now.getUTCFullYear(), cm = now.getUTCMonth(), cd = now.getUTCDate();\\n      if (argc === 1) {\\n        var v = parseInt(args[0], 10);\\n        if (isNaN(v)) return cm === (args[0] in MONTHS ? MONTHS[args[0]] : -1);\\n        if (v \\u003c 32) return cd === v;\\n        return cy === v;\\n      }\\n      function side(list) {\\n        var s = {};\\n        list.forEach(function (a) {\\n          var v = parseInt(a, 10);\\n          if (isNaN(v)) s.m = a in MONTHS ? MONTHS[a] : -1;\\n          else if (v \\u003c 32) s.d = v;\\n          else s.y = v;\\n        });\\n        return s;\\n      }\\n      var half = argc >> 1;\\n      var a = side(args.slice(0, half));\\n      var b = side(args.slice(half));\\n      if (a.m === -1 || b.m === -1) return false;\\n      if (argc === 2 && a.d !== undefined && b.d !== undefined) { a.m = cm; b.m = cm; }\\n      var y1 = a.y !== undefined ? a.y : cy;\\n      var m1 = a.m !== undefined ? a.m : 0;\\n      var y2 = b.y !== undefined ? b.y : cy;\\n      var m2 = b.m !== undefined ? b.m : 11;\\n      var start = Date.UTC(y1, m1, a.d !== undefined ? a.d : 1, 0, 0, 0);\\n      var end = Date.UTC(y2, m2, b.d !== undefined ? b.d : lastDay(y2, m2), 23, 59, 59);\\n      var t = Math.floor(now.getTime() / 1000) * 1000;\\n      if (start \\u003c= end) return start \\u003c= t && t \\u003c= end;\\n      return t \\u003c= end || t >= start;\\n    };\\n\\n    h.timeRange = function () {\\n      var args = Array.prototype.slice.call(arguments);\\n      var gmt = lastIsGmt(args);\\n      if (gmt) args.pop();\\n      var argc = args.length;\\n      if (argc \\u003c 1) return false;\\n      var now = wallClock(nowMs(), tz, gmt);\\n      var hour = now.getUTCHours();\\n      var n = args.map(function (x) { return Number(x); });\\n      if (argc === 1) return hour === n[0];\\n      if (argc === 2) return n[0] \\u003c= hour && hour \\u003c= n[1];\\n      var sec = hour * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();\\n      var s1, s2;\\n      if (argc === 4) { s1 = n[0] * 3600 + n[1] * 60; s2 = n[2] * 3600 + n[3] * 60 + 59; }\\n      else if (argc === 6) { s1 = n[0] * 3600 + n[1] * 60 + n[2]; s2 = n[3] * 3600 + n[4] * 60 + n[5]; }\\n      else throw new Error((cfg.msg && cfg.msg.timeRangeArgs) || 'timeRange: wrong number of arguments (1, 2, 4 or 6)');\\n      if (s1 \\u003c= s2) return s1 \\u003c= sec && sec \\u003c= s2;\\n      return sec \\u003c= s2 || sec >= s1;\\n    };\\n\\n    h.alert = function (msg) {\\n      if (alerts.length \\u003c 50) alerts.push(String(msg).slice(0, 500));\\n    };\\n\\n    return {\\n      helpers: h,\\n      takeAlerts: function () { var a = alerts.slice(); alerts.length = 0; return a; }\\n    };\\n  }\\n\\n  var HELPER_NAMES = ['isPlainHostName', 'dnsDomainIs', 'localHostOrDomainIs', 'isResolvable', 'isInNet',\\n    'dnsResolve', 'convert_addr', 'myIpAddress', 'dnsDomainLevels', 'shExpMatch', 'weekdayRange',\\n    'dateRange', 'timeRange', 'alert'];\\n\\n  return {\\n    create: create,\\n    HELPER_NAMES: HELPER_NAMES,\\n    isValidIpAddress: isValidIpAddress,\\n    globToRegExp: globToRegExp\\n  };\\n});\\n\";\n  var WORKER_SRC = \"var __pt = PacRuntime.create(__PT_CFG);\\n\\nPacRuntime.HELPER_NAMES.forEach(function (name) {\\n  if (typeof self[name] !== 'function') self[name] = __pt.helpers[name];\\n});\\n\\nself.onmessage = function (e) {\\n  var d = e.data || {};\\n  if (d.type !== 'eval') return;\\n  var out = { type: 'result', id: d.id };\\n  var t0 = Date.now();\\n  try {\\n    if (typeof FindProxyForURL !== 'function') throw new Error((__PT_CFG.msg && __PT_CFG.msg.noEntry) || 'FindProxyForURL is not defined');\\n    var v = FindProxyForURL(d.url, d.host);\\n    out.ok = true;\\n    out.valueType = v === null ? 'null' : typeof v;\\n    out.value = typeof v === 'string' ? v : String(v);\\n  } catch (err) {\\n    out.ok = false;\\n    out.error = err && err.name && err.message ? err.name + ': ' + err.message : String(err);\\n  }\\n  out.ms = Date.now() - t0;\\n  out.alerts = __pt.takeAlerts();\\n  self.postMessage(out);\\n};\\n\";\n  var parentWin = window.parent;\n\n  var job = null;\n  var worker = null;\n  var blobUrl = null;\n  var timer = null;\n  var seq = 0;\n\n  function send(m) { parentWin.postMessage(m, '*'); }\n\n  function t(j, key, vars) {\n    var s = String((j.msg && j.msg[key]) || key);\n    return s.replace(/\\{(\\w+)\\}/g, function (m, k) {\n      return vars && Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : m;\n    });\n  }\n\n  function stopWorker() {\n    clearTimeout(timer);\n    if (worker) { worker.onmessage = null; worker.onerror = null; worker.terminate(); worker = null; }\n    if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }\n  }\n\n  function lineCount(s) { return s.split('\\n').length - 1; }\n\n  function boot(j, pac, onReady, onFail) {\n    stopWorker();\n    var head = RUNTIME_SRC + '\\nvar __PT_CFG = ' + JSON.stringify(j.cfg) + ';\\n' + WORKER_SRC + '\\n';\n    var offset = lineCount(head);\n    var src = head + pac.code + '\\n;self.postMessage({ type: \"ready\" });\\n';\n    blobUrl = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));\n    var w;\n    try {\n      w = new Worker(blobUrl);\n    } catch (e) {\n      onFail(t(j, 'workerBoot', { msg: e && e.message }));\n      return;\n    }\n    worker = w;\n    var settled = false;\n    timer = setTimeout(function () {\n      if (settled || w !== worker) return;\n      settled = true;\n      stopWorker();\n      onFail(t(j, 'loadTimeout', { ms: j.loadTimeoutMs }));\n    }, j.loadTimeoutMs);\n    w.onmessage = function (ev) {\n      if (w !== worker) return;\n      var m = ev.data || {};\n      if (!settled && m.type === 'ready') {\n        settled = true;\n        clearTimeout(timer);\n        onReady();\n      } else if (settled && m.type === 'result') {\n        onResult(m);\n      }\n    };\n    w.onerror = function (ev) {\n      if (ev && ev.preventDefault) ev.preventDefault();\n      if (w !== worker || settled) return;\n      settled = true;\n      stopWorker();\n      var line = ev && ev.lineno ? ev.lineno - offset : 0;\n      onFail(t(j, 'loadFail', { line: line > 0 ? t(j, 'loadFailLine', { line: line }) : '', msg: (ev && ev.message) || t(j, 'syntaxError') }));\n    };\n  }\n\n  var pending = null;\n\n  function runPac() {\n    var j = job;\n    if (!j) return;\n    if (j.pi >= j.pacs.length) {\n      send({ type: 'done', jobId: j.id });\n      job = null;\n      stopWorker();\n      return;\n    }\n    var pac = j.pacs[j.pi];\n    j.ui = 0;\n    boot(j, pac, function () { nextUrl(); }, function (msg) {\n      if (job !== j) return;\n      send({ type: 'load-error', jobId: j.id, key: pac.key, message: msg });\n      j.pi++;\n      runPac();\n    });\n  }\n\n  function nextUrl() {\n    var j = job;\n    if (!j) return;\n    if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }\n    var u = j.urls[j.ui];\n    var id = ++seq;\n    pending = { id: id, index: j.ui, t0: Date.now() };\n    worker.postMessage({ type: 'eval', id: id, url: u.url, host: u.host });\n    timer = setTimeout(function () { onTimeout(j, id); }, j.timeoutMs);\n  }\n\n  function onResult(m) {\n    var j = job;\n    if (!j || !pending || m.id !== pending.id) return;\n    clearTimeout(timer);\n    var p = pending;\n    pending = null;\n    send({\n      type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index,\n      ok: !!m.ok, value: m.value, valueType: m.valueType, error: m.error, alerts: m.alerts || [], ms: m.ms\n    });\n    j.ui++;\n    nextUrl();\n  }\n\n  function onTimeout(j, id) {\n    if (job !== j || !pending || pending.id !== id) return;\n    var p = pending;\n    pending = null;\n    stopWorker();\n    send({ type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index, ok: false, timeout: true,\n      error: t(j, 'evalTimeout', { ms: j.timeoutMs }), alerts: [], ms: Date.now() - p.t0 });\n    j.ui++;\n    if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }\n    var pac = j.pacs[j.pi];\n    boot(j, pac, function () { nextUrl(); }, function (msg) {\n      if (job !== j) return;\n      send({ type: 'load-error', jobId: j.id, key: pac.key, message: msg, fromIndex: j.ui });\n      j.pi++;\n      runPac();\n    });\n  }\n\n  window.addEventListener('message', function (e) {\n    if (e.source !== parentWin) return;\n    var d = e.data || {};\n    if (d.type === 'run') {\n      stopWorker();\n      pending = null;\n      job = {\n        id: d.jobId, pacs: d.pacs || [], urls: d.urls || [], cfg: d.cfg || {}, msg: d.msg || {},\n        timeoutMs: d.timeoutMs || 200, loadTimeoutMs: d.loadTimeoutMs || 1000, pi: 0, ui: 0\n      };\n      runPac();\n    } else if (d.type === 'cancel') {\n      stopWorker();\n      pending = null;\n      job = null;\n    }\n  });\n\n  send({ type: 'hello' });\n})();\n\u003c/script>\n\u003c/body>\n\u003c/html>\n";
 </script>
-<script>/* PAC ファイル テスター: app.js | MIT */
-// ===========================
-// PAC ファイル テスター — 画面の制御
-// 純粋関数は core.js（window.PacCore）、構文の解析は acorn（window.acorn）。
-// PAC は、このページでは実行しない。sandbox の iframe（オリジン null）の中の Worker に渡して評価する（sandbox.html）
-// 外部には一切通信しない（Content-Security-Policy でも禁止している）
-// 画面の文言は messages.js の app（build.mjs が window.PT_MSG として言語ごとに埋め込む）
-// 注意: このファイルは pac-tester.html の script 要素にそのまま入るので、「<」のすぐ後ろに script と書かない
-// ===========================
+<script>/* PAC File Tester: app.js | MIT */
 (function () {
   'use strict';
 
@@ -7864,14 +7800,12 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
   var A = MSG.app;
   var fmt = Core.fmt;
 
-  var EVAL_DELAY = 400;        // 入力が止まってから評価するまで（ミリ秒）
-  var TIMEOUT_MS = 200;        // 1 つの URL の評価にかけてよい時間
-  var LOAD_TIMEOUT_MS = 1000;  // PAC の読み込み（関数の外のコード）にかけてよい時間
-  var WATCHDOG_MS = 3000;      // 枠から返事が無いまま、この時間がたったら枠ごと作り直す
+  var EVAL_DELAY = 400;
+  var TIMEOUT_MS = 200;
+  var LOAD_TIMEOUT_MS = 1000;
+  var WATCHDOG_MS = 3000;
   var MAX_URLS = 2000;
 
-  // --- ブラウザへの保存（キーは必ず "pac-tester_" で始める。読み書きはすべて try/catch） ---
-  // 日本語版と英語版で同じキーを使う（中身は言語によらない設定と入力なので、どちらで開いても続きから使える）
   var KEY_PREFIX = 'pac-tester_';
   var store = {
     get: function (name, fallback) {
@@ -7884,7 +7818,7 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
       try { window.localStorage.setItem(KEY_PREFIX + name, JSON.stringify(value)); return true; } catch (e) { return false; }
     },
     remove: function (name) {
-      try { window.localStorage.removeItem(KEY_PREFIX + name); } catch (e) { /* 何もしない */ }
+      try { window.localStorage.removeItem(KEY_PREFIX + name); } catch (e) {   }
     }
   };
 
@@ -7909,18 +7843,17 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
 
   var state = {
     diff: false,
-    urls: [],           // parseUrlList の結果（エラーの行も含む）
-    evalUrls: [],       // 評価する URL（エラーの行を除く）
+    urls: [],
+    evalUrls: [],
     results: { a: [], b: [] },
     loadError: { a: null, b: null },
-    job: null,          // { id, keys, done: {a, b}, started }
+    job: null,
     jobSeq: 0,
     usedWhen: '',
-    valueFilter: null,  // 凡例で選んだ戻り値
+    valueFilter: null,
     fileName: { a: '', b: '' }
   };
 
-  // ---------- お知らせ ----------
   var toastTimer = null;
   function toast(text, actionLabel, action) {
     el.toastText.textContent = text;
@@ -7942,7 +7875,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     el.status.className = warn ? 'is-warn' : '';
   }
 
-  // ---------- 設定 ----------
   function tzLabel(min) {
     var sign = min < 0 ? '−' : '+';
     var a = Math.abs(min);
@@ -7951,7 +7883,7 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
   function fillTz() {
     var list = [];
     for (var m = -12 * 60; m <= 14 * 60; m += 30) list.push(m);
-    [345, 525, 765, 825].forEach(function (x) { list.push(x); });   // +5:45・+8:45・+12:45・+13:45
+    [345, 525, 765, 825].forEach(function (x) { list.push(x); });
     list.sort(function (a, b) { return a - b; });
     list.forEach(function (m) {
       var o = document.createElement('option');
@@ -8017,13 +7949,11 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     el.datetime.disabled = el.useNow.checked;
   }
 
-  // ---------- 隔離用の枠（iframe sandbox） ----------
   var sandbox = { frame: null, ready: false, queue: null, lastHeard: 0 };
 
   function createSandbox() {
     if (sandbox.frame) sandbox.frame.remove();
     var f = document.createElement('iframe');
-    // allow-same-origin を付けないので、枠のオリジンは null（このページの保存領域には届かない）
     f.setAttribute('sandbox', 'allow-scripts');
     f.setAttribute('title', A.iframeTitle);
     f.setAttribute('aria-hidden', 'true');
@@ -8039,7 +7969,7 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     if (sandbox.ready && sandbox.frame && sandbox.frame.contentWindow) {
       sandbox.frame.contentWindow.postMessage(msg, '*');
     } else {
-      sandbox.queue = msg;       // 準備ができたら送る（最後の 1 件だけ）
+      sandbox.queue = msg;
     }
   }
 
@@ -8081,7 +8011,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     }
   });
 
-  // 枠が応答しなくなったら、枠ごと作り直す（ページ本体は止まらない）
   setInterval(function () {
     var job = state.job;
     if (!job || !sandbox.ready) return;
@@ -8099,7 +8028,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     }
   }, 500);
 
-  // ---------- 評価 ----------
   var evalTimer = null;
   function scheduleEval() {
     clearTimeout(evalTimer);
@@ -8146,7 +8074,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     }), timeouts > 0);
   }
 
-  // ---------- lint の表示 ----------
   var SEV = { error: A.sevError, warning: A.sevWarning, info: A.sevInfo };
   var lintCache = { a: { code: null, res: null }, b: { code: null, res: null } };
   function lintOf(key) {
@@ -8262,13 +8189,11 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     var end = pos + (lines[line - 1] || '').length;
     ta.focus();
     ta.setSelectionRange(pos, end);
-    // 選んだ行が見えるようにスクロールする
     var lh = parseFloat(getComputedStyle(ta).lineHeight) || 20;
     ta.scrollTop = Math.max(0, (line - 4) * lh);
     ta.scrollIntoView({ block: 'nearest' });
   }
 
-  // ---------- 結果の表 ----------
   var renderQueued = false;
   function scheduleRender() {
     if (renderQueued) return;
@@ -8276,7 +8201,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     requestAnimationFrame(function () { renderQueued = false; render(); });
   }
 
-  // 戻り値ごとの色（DIRECT は緑、ほかは出てきた順に 6 色）
   function colorClasses() {
     var map = Object.create(null);
     var n = 0;
@@ -8349,7 +8273,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     var onlyChanged = diff && el.onlyChanged.checked;
     var onlyProblems = el.onlyProblems.checked;
 
-    // 見出し
     el.thead.textContent = '';
     var headRow = document.createElement('tr');
     ['#', A.thUrl].concat(diff ? [A.oldPac, A.newPac] : [A.thResult]).forEach(function (text) {
@@ -8359,7 +8282,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     });
     el.thead.appendChild(headRow);
 
-    // 凡例（戻り値ごとの件数。押すと絞り込み）
     var counts = Object.create(null);
     var order = [];
     var keyForLegend = diff ? 'b' : 'a';
@@ -8386,7 +8308,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
       el.legend.appendChild(b);
     });
 
-    // 行
     var frag = document.createDocumentFragment();
     var shown = 0;
     urls.forEach(function (u, i) {
@@ -8447,7 +8368,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
       el.tbody.appendChild(tr0);
     } else el.tbody.appendChild(frag);
 
-    // まとめ
     var badLines = state.urls.filter(function (u) { return u.error; });
     var parts = [];
     var doneA = ra.filter(Boolean).length;
@@ -8475,7 +8395,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     el.whenUsed.textContent = (le.length ? le.join(A.sep) + A.sep : '') + (state.usedWhen ? fmt(A.usedWhen, { when: state.usedWhen }) : '');
   }
 
-  // ---------- 差分モード ----------
   function setDiff(on) {
     state.diff = on;
     document.body.classList.toggle('pt-diff-mode', on);
@@ -8489,11 +8408,9 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     }
   }
 
-  // ---------- ファイル ----------
   function decodeText(buf) {
-    // ほとんどは UTF-8。Windows のメモ帳などで作った Shift_JIS のファイルも読めるようにする
-    try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^\uFEFF/, ''); } catch (e) { /* 次へ */ }
-    try { return new TextDecoder('shift_jis').decode(buf); } catch (e) { /* 次へ */ }
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(buf).replace(/^\uFEFF/, ''); } catch (e) {   }
+    try { return new TextDecoder('shift_jis').decode(buf); } catch (e) {   }
     return new TextDecoder('utf-8').decode(buf);
   }
   function readFile(file, done) {
@@ -8558,7 +8475,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     download(state.diff ? 'pac-diff.csv' : 'pac-results.csv', '\uFEFF' + Core.toCsv(header, rows), 'text/csv;charset=utf-8');
   }
 
-  // ---------- 見本 ----------
   function loadSample(withUndo) {
     var prev = { a: el.pacA.value, b: el.pacB.value, urls: el.urls.value, hosts: el.hosts.value, myIp: el.myIp.value, diff: state.diff };
     el.pacA.value = Core.SAMPLE_PAC;
@@ -8585,7 +8501,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     }
   }
 
-  // ---------- 起動 ----------
   function init() {
     fillTz();
     var saved = store.get('settings', null);
@@ -8626,12 +8541,11 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
       setStatus(A.showingSample);
     }
 
-    try { el.licenseText.textContent = $('licenses').textContent.trim(); } catch (e) { /* 何もしない */ }
+    try { el.licenseText.textContent = $('licenses').textContent.trim(); } catch (e) {   }
 
     createSandbox();
     runAll();
 
-    // 入力したら評価し直す
     [el.pacA, el.pacB, el.urls].forEach(function (t) {
       t.addEventListener('input', function () {
         var label = t === el.pacA ? el.fileA : t === el.pacB ? el.fileB : null;
@@ -8661,7 +8575,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
     [el.filter].forEach(function (t) { t.addEventListener('input', scheduleRender); });
     [el.onlyChanged, el.onlyProblems].forEach(function (t) { t.addEventListener('change', scheduleRender); });
 
-    // ファイルを開く
     var openKey = 'a';
     document.querySelectorAll('[data-open]').forEach(function (b) {
       b.addEventListener('click', function () { openKey = b.getAttribute('data-open'); el.fileInput.value = ''; el.fileInput.click(); });
@@ -8673,7 +8586,6 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
       download('pac-test-urls.txt', el.urls.value.replace(/\n/g, '\r\n'), 'text/plain;charset=utf-8');
     });
 
-    // ドラッグ＆ドロップ（URL の欄に落とすと URL 一覧、新 PAC の欄なら新 PAC、ほかは PAC）
     var dragDepth = 0;
     document.addEventListener('dragenter', function (e) {
       if (!hasFiles(e)) return;
@@ -8712,12 +8624,12 @@ window.PT_SANDBOX_HTML = "\u003c!DOCTYPE html>\n\u003chtml lang=\"ja\">\n\u003ch
 
 </script>
 <script type="text/plain" id="licenses">
-THIRD-PARTY SOFTWARE NOTICES / 同梱しているソフトウェアのライセンス
+THIRD-PARTY SOFTWARE NOTICES
 
-PAC ファイル テスター（pac-tester.html）には、次のライブラリをそのまま埋め込んでいます。
-  - acorn 8.18.0（npm: acorn/dist/acorn.js） MIT
+PAC File Tester (pac-tester-en.html) embeds the following library unchanged.
+  - acorn 8.18.0 (npm: acorn/dist/acorn.js) MIT
 
-■ 本ツール自身のコード（src/core.js・src/pac-runtime.js・src/app.js ほか）
+This tool's own code (src/core.js, src/pac-runtime.js, src/app.js and others)
 MIT License, Copyright (c) 2026 Youhei Oonuki
 https://github.com/YouheiOonuki/pac-tester
 

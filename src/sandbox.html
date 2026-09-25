@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{LANG}}">
 <head>
 <meta charset="UTF-8">
 <!-- PAC を評価するための隔離用の枠（iframe sandbox="allow-scripts" の srcdoc。オリジンは null）。
      通信・画像・フォームはすべて禁止。Worker は、この枠で作った Blob からだけ起動できる -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; form-action 'none'; base-uri 'none'">
-<title>PAC 評価用の枠</title>
+<title>{{TITLE}}</title>
 </head>
 <body>
 <script>
 // ===========================
 // PAC ファイル テスター — 隔離用の枠の中の制御（ページ本体とは postMessage だけでやりとりする）
-// 1. 本体から { type: 'run', pacs, urls, cfg } を受け取る
+// 1. 本体から { type: 'run', pacs, urls, cfg, msg } を受け取る（msg は messages.js の sandbox。この枠には言語ごとの文言を置かない）
 // 2. PAC ごとに Worker を起動し（pac-runtime.js・worker.js・PAC をつなげた Blob）、URL を 1 件ずつ評価させる
 // 3. 1 件が timeoutMs を超えたら Worker を止めて（terminate）作り直し、次の URL へ進む
 // ===========================
@@ -28,6 +28,14 @@
   var seq = 0;
 
   function send(m) { parentWin.postMessage(m, '*'); }
+
+  // 本体から受け取った文言に値を差し込む
+  function t(j, key, vars) {
+    var s = String((j.msg && j.msg[key]) || key);
+    return s.replace(/\{(\w+)\}/g, function (m, k) {
+      return vars && Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : m;
+    });
+  }
 
   function stopWorker() {
     clearTimeout(timer);
@@ -48,7 +56,7 @@
     try {
       w = new Worker(blobUrl);
     } catch (e) {
-      onFail('評価用の Worker を起動できませんでした（' + (e && e.message) + '）');
+      onFail(t(j, 'workerBoot', { msg: e && e.message }));
       return;
     }
     worker = w;
@@ -57,7 +65,7 @@
       if (settled || w !== worker) return;
       settled = true;
       stopWorker();
-      onFail('PAC の読み込み（関数の外のコード）が ' + j.loadTimeoutMs + ' ミリ秒を超えたので止めました');
+      onFail(t(j, 'loadTimeout', { ms: j.loadTimeoutMs }));
     }, j.loadTimeoutMs);
     w.onmessage = function (ev) {
       if (w !== worker) return;
@@ -76,7 +84,7 @@
       settled = true;
       stopWorker();
       var line = ev && ev.lineno ? ev.lineno - offset : 0;
-      onFail('PAC を読み込めませんでした' + (line > 0 ? '（' + line + ' 行目）' : '') + '：' + ((ev && ev.message) || '構文エラー'));
+      onFail(t(j, 'loadFail', { line: line > 0 ? t(j, 'loadFailLine', { line: line }) : '', msg: (ev && ev.message) || t(j, 'syntaxError') }));
     };
   }
 
@@ -132,7 +140,7 @@
     pending = null;
     stopWorker();                           // 無限ループしている Worker をここで止める
     send({ type: 'result', jobId: j.id, key: j.pacs[j.pi].key, index: p.index, ok: false, timeout: true,
-      error: j.timeoutMs + ' ミリ秒を超えたので止めました（無限ループや重い処理がないか確かめてください）', alerts: [], ms: Date.now() - p.t0 });
+      error: t(j, 'evalTimeout', { ms: j.timeoutMs }), alerts: [], ms: Date.now() - p.t0 });
     j.ui++;
     if (j.ui >= j.urls.length) { j.pi++; runPac(); return; }
     var pac = j.pacs[j.pi];
@@ -151,7 +159,7 @@
       stopWorker();
       pending = null;
       job = {
-        id: d.jobId, pacs: d.pacs || [], urls: d.urls || [], cfg: d.cfg || {},
+        id: d.jobId, pacs: d.pacs || [], urls: d.urls || [], cfg: d.cfg || {}, msg: d.msg || {},
         timeoutMs: d.timeoutMs || 200, loadTimeoutMs: d.loadTimeoutMs || 1000, pi: 0, ui: 0
       };
       runPac();

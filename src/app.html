@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <!--
-  PAC ファイル テスター（yorozu-craft）  https://yorozu-craft.com/pac-tester/
-  このファイル 1 つで動きます。インストール不要・外部への通信なし。
-  貼り付けた PAC は、ページとは別のオリジン（sandbox の iframe の中の Worker）で評価します。
-  本体のコード: MIT License, Copyright (c) 2026 Youhei Oonuki
-  同梱ライブラリ: {{LIB_SUMMARY}}
-  同梱ライブラリのライセンス全文は、画面の「ライセンス」またはこのファイルの末尾（id="licenses"）にあります。
-  ビルド: {{BUILD_NOTE}}
+{{t:headerCommentHtml}}
 -->
-<html lang="ja">
+<html lang="{{t:lang}}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 外部には一切通信しない（読み込み・送信とも禁止）。Worker は Blob からだけ起動できる。
-       PAC を評価する枠（srcdoc の iframe）と、その中の Worker もこの決まりを引き継ぐ -->
+  {{t:cspCommentHtml}}
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; worker-src blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
   <meta name="robots" content="noindex">
   <meta name="color-scheme" content="light dark">
-  <title>PAC ファイル テスター</title>
+  <title>{{t:title}}</title>
   <link rel="icon" href="{{FAVICON}}">
   <style>
 {{APP_CSS}}
@@ -27,13 +20,13 @@
   <header class="pt-header">
     <div class="pt-brand">
       <span class="pt-logo" aria-hidden="true">PAC</span>
-      <span class="pt-title">PAC ファイル テスター</span>
+      <span class="pt-title">{{t:title}}</span>
     </div>
-    <div class="pt-toolbar" role="toolbar" aria-label="操作">
-      <button type="button" id="pt-run" class="pt-primary" title="いまの PAC と URL 一覧で評価し直す（Ctrl+Enter）">評価する</button>
-      <button type="button" id="pt-diff" aria-pressed="false" title="旧 PAC と新 PAC を同じ URL 一覧で比べる">差分モード</button>
-      <button type="button" id="pt-sample" title="見本の PAC・URL 一覧・ホスト表を出す">見本</button>
-      <button type="button" id="pt-about" title="このツールについて・ライセンス">ライセンス</button>
+    <div class="pt-toolbar" role="toolbar" aria-label="{{t:toolbarLabel}}">
+      <button type="button" id="pt-run" class="pt-primary" title="{{t:runTitle}}">{{t:run}}</button>
+      <button type="button" id="pt-diff" aria-pressed="false" title="{{t:diffTitle}}">{{t:diff}}</button>
+      <button type="button" id="pt-sample" title="{{t:sampleTitle}}">{{t:sample}}</button>
+      <button type="button" id="pt-about" title="{{t:aboutTitle}}">{{t:about}}</button>
     </div>
   </header>
 
@@ -41,38 +34,38 @@
     <div class="pt-col">
       <section class="pt-card" aria-labelledby="pt-h-pac">
         <div class="pt-card-head">
-          <h2 id="pt-h-pac">PAC ファイル</h2>
-          <p class="pt-hint">貼り付けるか、ファイルをここにドラッグ。入力すると自動で評価します。</p>
+          <h2 id="pt-h-pac">{{t:pacHeading}}</h2>
+          <p class="pt-hint">{{t:pacHint}}</p>
         </div>
         <div class="pt-pac" id="pt-pac-a-wrap">
           <div class="pt-pac-head">
             <label for="pt-pac-a" id="pt-pac-a-label">PAC</label>
             <span class="pt-file" id="pt-file-a"></span>
-            <button type="button" class="pt-small" data-open="a">開く</button>
+            <button type="button" class="pt-small" data-open="a">{{t:open}}</button>
           </div>
-          <textarea id="pt-pac-a" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="function FindProxyForURL(url, host) { … } を貼り付け"></textarea>
+          <textarea id="pt-pac-a" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="{{t:pacPlaceholder}}"></textarea>
         </div>
         <div class="pt-pac" id="pt-pac-b-wrap" hidden>
           <div class="pt-pac-head">
-            <label for="pt-pac-b">新 PAC（変更後）</label>
+            <label for="pt-pac-b">{{t:newPacLabel}}</label>
             <span class="pt-file" id="pt-file-b"></span>
-            <button type="button" class="pt-small" data-open="b">開く</button>
-            <button type="button" class="pt-small" id="pt-copy-ab" title="旧 PAC の内容を新 PAC に写す">旧を写す</button>
+            <button type="button" class="pt-small" data-open="b">{{t:open}}</button>
+            <button type="button" class="pt-small" id="pt-copy-ab" title="{{t:copyOldTitle}}">{{t:copyOld}}</button>
           </div>
-          <textarea id="pt-pac-b" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="変更後の PAC を貼り付け"></textarea>
+          <textarea id="pt-pac-b" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="{{t:newPacPlaceholder}}"></textarea>
         </div>
         <input type="file" id="pt-file-input" accept=".pac,.dat,.js,.txt,application/x-ns-proxy-autoconfig,text/plain" hidden>
-        <label class="pt-check"><input type="checkbox" id="pt-save-draft"> PAC と URL 一覧も、このブラウザに保存する（既定はオフ。共有の PC ではオフのままに）</label>
+        <label class="pt-check"><input type="checkbox" id="pt-save-draft">{{t:saveDraft}}</label>
       </section>
 
       <section class="pt-card" aria-labelledby="pt-h-lint">
         <div class="pt-card-head">
-          <h2 id="pt-h-lint">構文・ロジックのチェック</h2>
+          <h2 id="pt-h-lint">{{t:lintHeading}}</h2>
           <p class="pt-hint" id="pt-lint-summary" aria-live="polite"></p>
         </div>
         <div id="pt-lint"></div>
         <details class="pt-details" id="pt-patterns-box">
-          <summary>shExpMatch のパターン一覧 <span id="pt-patterns-count"></span></summary>
+          <summary>{{t:patternsSummary}} <span id="pt-patterns-count"></span></summary>
           <div id="pt-patterns"></div>
         </details>
       </section>
@@ -81,57 +74,57 @@
     <div class="pt-col">
       <section class="pt-card" aria-labelledby="pt-h-urls">
         <div class="pt-card-head">
-          <h2 id="pt-h-urls">テストする URL</h2>
-          <p class="pt-hint">1 行に 1 つ。ホスト名は URL から取り出します（# で始まる行はメモ）。</p>
+          <h2 id="pt-h-urls">{{t:urlsHeading}}</h2>
+          <p class="pt-hint">{{t:urlsHint}}</p>
         </div>
         <textarea id="pt-urls" class="pt-code" rows="8" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" aria-labelledby="pt-h-urls"></textarea>
         <div class="pt-row">
-          <button type="button" class="pt-small" id="pt-urls-open">.txt を開く</button>
-          <button type="button" class="pt-small" id="pt-urls-save">.txt で保存</button>
+          <button type="button" class="pt-small" id="pt-urls-open">{{t:urlsOpen}}</button>
+          <button type="button" class="pt-small" id="pt-urls-save">{{t:urlsSave}}</button>
           <input type="file" id="pt-urls-input" accept=".txt,.csv,text/plain" hidden>
         </div>
       </section>
 
       <details class="pt-card pt-settings" id="pt-settings">
-        <summary><h2>評価の設定</h2><span class="pt-hint" id="pt-settings-summary"></span></summary>
+        <summary><h2>{{t:settingsHeading}}</h2><span class="pt-hint" id="pt-settings-summary"></span></summary>
         <div class="pt-field">
-          <label for="pt-hosts">ホスト名と IP アドレスの対応表（DNS の代わり）</label>
-          <p class="pt-hint">dnsResolve・isInNet・isResolvable が使います。ここに無いホストは「解決できない」扱いです。「*.example.com 10.0.0.1」の形で下のホストすべてにも当てられます。</p>
+          <label for="pt-hosts">{{t:hostsLabel}}</label>
+          <p class="pt-hint">{{t:hostsHint}}</p>
           <textarea id="pt-hosts" class="pt-code" rows="5" spellcheck="false" autocomplete="off" wrap="off"></textarea>
           <p class="pt-warn" id="pt-hosts-errors"></p>
         </div>
         <div class="pt-field">
-          <label for="pt-myip">myIpAddress() が返す IP アドレス</label>
+          <label for="pt-myip">{{t:myIpLabel}}</label>
           <input type="text" id="pt-myip" inputmode="decimal" autocomplete="off" spellcheck="false">
         </div>
         <div class="pt-field">
-          <span class="pt-label" id="pt-when-label">評価に使う日時（weekdayRange・dateRange・timeRange 用）</span>
-          <label class="pt-check"><input type="checkbox" id="pt-use-now"> いまの日時を使う</label>
+          <span class="pt-label" id="pt-when-label">{{t:whenLabel}}</span>
+          <label class="pt-check"><input type="checkbox" id="pt-use-now">{{t:useNow}}</label>
           <div class="pt-row" role="group" aria-labelledby="pt-when-label">
-            <label for="pt-datetime" class="pt-visually-hidden">日時</label>
+            <label for="pt-datetime" class="pt-visually-hidden">{{t:datetimeLabel}}</label>
             <input type="datetime-local" id="pt-datetime" step="1">
-            <label for="pt-tz">UTC との時差</label>
+            <label for="pt-tz">{{t:tzLabel}}</label>
             <select id="pt-tz"></select>
           </div>
         </div>
         <div class="pt-field">
-          <label class="pt-check"><input type="checkbox" id="pt-strip-https"> https の URL は、パスとクエリを除いて渡す（Chrome・Edge などの動き。例: https://www.example.com/a?b → https://www.example.com/）</label>
+          <label class="pt-check"><input type="checkbox" id="pt-strip-https">{{t:stripHttps}}</label>
         </div>
-        <p class="pt-hint">設定はこのブラウザに保存されます（PAC の中身とは別）。「見本」で見本の設定に戻せます。</p>
+        <p class="pt-hint">{{t:settingsHint}}</p>
       </details>
 
       <section class="pt-card" aria-labelledby="pt-h-results">
         <div class="pt-card-head">
-          <h2 id="pt-h-results">結果</h2>
+          <h2 id="pt-h-results">{{t:resultsHeading}}</h2>
           <p class="pt-hint" id="pt-summary" aria-live="polite"></p>
         </div>
-        <div class="pt-legend" id="pt-legend" aria-label="戻り値ごとの件数（押すと絞り込み）"></div>
+        <div class="pt-legend" id="pt-legend" aria-label="{{t:legendLabel}}"></div>
         <div class="pt-row pt-filters">
-          <label for="pt-filter" class="pt-visually-hidden">URL・結果で絞り込み</label>
-          <input type="search" id="pt-filter" placeholder="URL・結果で絞り込み">
-          <label class="pt-check" id="pt-only-changed-wrap" hidden><input type="checkbox" id="pt-only-changed"> 変わった行だけ</label>
-          <label class="pt-check"><input type="checkbox" id="pt-only-problems"> エラー・注意だけ</label>
-          <button type="button" class="pt-small" id="pt-csv">CSV で保存</button>
+          <label for="pt-filter" class="pt-visually-hidden">{{t:filterLabel}}</label>
+          <input type="search" id="pt-filter" placeholder="{{t:filterLabel}}">
+          <label class="pt-check" id="pt-only-changed-wrap" hidden><input type="checkbox" id="pt-only-changed">{{t:onlyChanged}}</label>
+          <label class="pt-check"><input type="checkbox" id="pt-only-problems">{{t:onlyProblems}}</label>
+          <button type="button" class="pt-small" id="pt-csv">{{t:csv}}</button>
         </div>
         <div class="pt-table-wrap">
           <table class="pt-table" id="pt-table">
@@ -146,30 +139,30 @@
 
   <footer class="pt-status">
     <span id="pt-status" aria-live="polite"></span>
-    <span class="pt-offline">通信しません・PAC は隔離した枠の中で評価します</span>
+    <span class="pt-offline">{{t:offline}}</span>
   </footer>
 
-  <div class="pt-drop" id="pt-drop" hidden><p>ここに離すと開きます</p></div>
+  <div class="pt-drop" id="pt-drop" hidden><p>{{t:drop}}</p></div>
   <div class="pt-toast" id="pt-toast" role="status" hidden><span id="pt-toast-text"></span> <button type="button" id="pt-toast-action" hidden></button></div>
 
   <dialog id="pt-about-dialog" aria-labelledby="pt-about-title">
     <form method="dialog" class="pt-dialog">
-      <h2 id="pt-about-title">このツールについて</h2>
-      <p>PAC ファイル テスター（yorozu-craft）。この HTML ファイル 1 つで動き、外部には一切通信しません。貼り付けた PAC は、ページとは別のオリジンを持つ枠（sandbox の iframe）の中の Worker で評価するので、このページの保存領域や、ほかのサイトには触れられません。</p>
-      <p>使い方・よくある質問：<a href="https://yorozu-craft.com/pac-tester/guide.html" target="_blank" rel="noopener noreferrer">https://yorozu-craft.com/pac-tester/guide.html</a>（リンクを押したときだけ開きます）</p>
-      <h3>同梱しているライブラリ</h3>
+      <h2 id="pt-about-title">{{t:aboutHeading}}</h2>
+      <p>{{t:aboutText}}</p>
+      {{t:aboutLinksHtml}}
+      <h3>{{t:libsHeading}}</h3>
       <ul class="pt-lib-list">
 {{LIB_LIST}}
       </ul>
-      <p class="pt-hint">このツールのコードは MIT License です。同梱ライブラリのライセンス全文は次のとおりです。</p>
+      <p class="pt-hint">{{t:licenseHint}}</p>
       <pre class="pt-license-text" id="pt-license-text" tabindex="0"></pre>
       <div class="pt-dialog-buttons">
-        <button type="submit" value="close" class="pt-primary">閉じる</button>
+        <button type="submit" value="close" class="pt-primary">{{t:close}}</button>
       </div>
     </form>
   </dialog>
 
-  <noscript><p class="pt-noscript">このツールは JavaScript を使います。ブラウザの設定で JavaScript を有効にしてください。</p></noscript>
+  <noscript><p class="pt-noscript">{{t:noscript}}</p></noscript>
 
 {{SCRIPTS}}
 <script type="text/plain" id="licenses">
