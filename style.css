@@ -84,7 +84,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .card h2 { margin-bottom: var(--sp-3); }
 
 /* ボタン（主は .btn-primary、ほかは .btn。色と線は皮が持つ） */
-.btn, .btn-primary { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; text-align: center; }
+.btn, .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); text-decoration: none; text-align: center; }
 
 /* 読みもの（guide.html） */
 .content h3 { margin: var(--sp-4) 0 var(--sp-1); }
