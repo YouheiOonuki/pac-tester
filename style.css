@@ -1,8 +1,5 @@
-/* ===========================
-   PAC ファイル テスター — yorozu-craft 共通の和紙風の配色
-   色はトークン（--bg / --card / --text / --muted / --accent / --border）だけを使う。
-   ダークモードは端末の設定に自動で合わせる（prefers-color-scheme。手動切替は付けない）
-   =========================== */
+/* PAC ファイル テスター — yorozu-common v2 の皮に載せる。色・字・角・線はトークン（--bg / --card / --text / --muted / --accent / --border / --radius / --sp-* / --fs-*）だけ。
+   暗い表示は端末の設定に自動で合わせる（トークンの差し替えは皮が持つ） */
 /* yorozu-common:begin v2 — サイト共通の土台と皮。正本は youheioonuki.github.io の tools/common/v2/base.css と skin.css（yorozu-plans DESIGN.md）。
    この begin〜end の間は手で直さない（tools/sync-common.mjs で全ツールに配る。ツール固有の上書きは end の後に書く） */
 /* yorozu-common v2 土台の層（yorozu-plans ROADMAP 7.98 D369、DESIGN.md）。すべてのページ（見せる・遊ぶ・世界を持つページも）に当てる。
@@ -71,148 +68,74 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 :where(html:not([data-skin="base"])) :where(.notice, [data-keep]) { border-left: 4px solid var(--text); background: var(--bg-2); padding: var(--sp-2) var(--sp-3); }
 :where(html:not([data-skin="base"])) :where(.fixed-bar) { position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--border); padding: var(--sp-2) var(--sp-4); }
 /* yorozu-common:end */
-/* yorozu-v1-carry — v1 の共通（和紙の色、2026-09-23〜10-17）から、このファイルのページが使っていた見た目をそのまま持ち込んだ（yorozu-plans ROADMAP 7.99、K192 段 3 の 0）。
-   段 3 の 2〜4 でこのページを v2 のトークンに載せ替えるときに、yorozu-v1-carry:end まで消す */
-:root {
-  color-scheme: light dark;
-  --bg: #f0ebe0; --bg-2: #e6dfd0; --card: #faf6ee; --text: #3a3025; --muted: #6e604f;
-  --accent: #8b4513; --accent-soft: #f3e6d8; --border: #cfc0a0; --input-border: #857561; --shadow: rgba(58, 48, 37, 0.12);
-  --error: #ce0000; --ok: #197a4b; --focus: #ffd43d; --focus-ring: #000;
-  --font-ui: "Noto Sans JP", "Noto Sans CJK JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-  --lh-body: 1.7; --lh-tight: 1.4; --radius: 8px;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1814; --bg-2: #25201a; --card: #2b251e; --text: #ece4d6; --muted: #b9ab96;
-    --accent: #e0a066; --accent-soft: #3a2e22; --border: #4a3f33; --input-border: #8c7d68; --shadow: rgba(0, 0, 0, 0.4);
-    --error: #ff8a7a; --ok: #6fcf97; --focus-ring: #ffd43d; --focus: #000;
-  }
-}
-body { font-family: var(--font-ui); background: var(--bg); color: var(--text); line-height: var(--lh-body); }
-a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-@media (hover: hover) { a:hover { text-decoration-thickness: 3px; } }
-:where(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
-.app-header > p { max-width: 40em; margin-left: auto; margin-right: auto; }
-/* yorozu-v1-carry:end */
 
 /* ヘッダー */
 .app-header {
   text-align: center;
-  padding: 1.4rem 1rem 1.1rem;
-  background: var(--bg-2);
-  border-bottom: 2px solid var(--border);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border);
 }
-.app-header h1 { font-size: 1.45rem; color: var(--accent); line-height: 1.4; }
-.app-header .subtitle { font-size: 0.88rem; color: var(--muted); margin-top: 0.3rem; }
+.app-header .subtitle { font-size: var(--fs-s); color: var(--muted); margin-top: var(--sp-1); }
+.app-header > p { max-width: 40em; margin-left: auto; margin-right: auto; }
 
 /* レイアウト */
-.app-main { max-width: 680px; margin: 0 auto; padding: 1rem; }
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.2rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px var(--shadow);
-}
-.card h2 {
-  font-size: 1.02rem;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.4rem;
-  margin-bottom: 0.9rem;
-}
+.app-main { max-width: 680px; margin: 0 auto; padding: var(--sp-4); }
+.card { margin-bottom: var(--sp-4); }
+.card h2 { margin-bottom: var(--sp-3); }
 
-/* 入力 */
-.field { margin-bottom: 1rem; }
-.field label { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
-.field .hint { font-size: var(--fs-s); color: var(--muted); margin-bottom: 0.4rem; }
-.field input[type="number"], .field input[type="text"], .field select {
-  width: 100%;
-  max-width: 16rem;
-  padding: 0.45rem 0.5rem;
-  font-size: 1rem;
-  border: 1px solid var(--input-border);
-  border-radius: 6px;
-  background: var(--card);
-  color: var(--text);
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.5rem 1.1rem;
-  border: none;
-  border-radius: 6px;
-  background: var(--accent);
-  color: var(--card);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-}
+/* ボタン（主は .btn-primary、ほかは .btn。色と線は皮が持つ） */
+.btn, .btn-primary { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; text-align: center; }
 
 /* 読みもの（guide.html） */
-.content h3 { font-size: 0.95rem; margin: 1rem 0 0.3rem; }
-.content p, .content li { font-size: 0.9rem; }
-.content p + p { margin-top: 0.5rem; }
-.content ul, .content ol { padding-left: 1.3rem; margin: 0.3rem 0; }
-.faq dt { font-weight: 600; margin-top: 0.9rem; font-size: 0.92rem; }
+.content h3 { margin: var(--sp-4) 0 var(--sp-1); }
+.content p + p { margin-top: var(--sp-2); }
+.content ul, .content ol { padding-left: 1.3rem; margin: var(--sp-1) 0; }
+.faq dt { font-weight: 700; margin-top: var(--sp-4); }
 .faq dt::before { content: 'Q. '; color: var(--accent); }
-.faq dd { font-size: 0.88rem; color: var(--muted); padding: 0.2rem 0 0.5rem 1.2rem; border-bottom: 1px solid var(--border); }
-.info-list { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1.2rem; font-size: 0.9rem; }
-.info-list dt { font-weight: 600; }
-.info-list dd { color: var(--muted); }
-.small { font-size: var(--fs-s); color: var(--muted); margin-top: 0.4rem; }
+.faq dd { color: var(--muted); padding: var(--sp-1) 0 var(--sp-2) 1.2rem; border-bottom: 1px solid var(--border); }
+.small { font-size: var(--fs-s); color: var(--muted); margin-top: var(--sp-2); }
 
 /* フッター */
 .app-footer {
   text-align: center;
-  padding: 1rem;
+  padding: var(--sp-4);
   font-size: var(--fs-s);
   color: var(--muted);
   border-top: 1px solid var(--border);
-  margin-top: 0.5rem;
+  margin-top: var(--sp-2);
 }
-.footer-nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin-bottom: 0.6rem; }
-.footer-nav a { color: var(--muted); text-decoration: none; }
+.footer-nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 0 var(--sp-4); margin-bottom: var(--sp-2); }
+.footer-nav a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--muted); text-decoration: none; }
 .footer-nav a:hover, .footer-nav a[aria-current="page"] { color: var(--accent); }
 
-@media (max-width: 480px) {
-  .app-header h1 { font-size: 1.2rem; }
-}
-
 /* ===== PAC ファイル テスター固有（紹介ページ・使い方ページ） ===== */
-.hero p { font-size: 0.93rem; }
-.cta { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin: 1rem 0 0.6rem; }
-.btn { text-decoration: none; text-align: center; }
-.btn-big { font-size: 1.05rem; padding: 0.75rem 1.4rem; }
-.btn-sub { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border); }
-.btn:hover { filter: brightness(1.08); }
+.cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; margin: var(--sp-4) 0 var(--sp-3); }
 .content code, .hero code {
   font-family: ui-monospace, SFMono-Regular, Consolas, "BIZ UDGothic", monospace;
-  font-size: 0.85em; background: var(--accent-soft); padding: 0.05em 0.3em; border-radius: 4px;
+  font-size: 0.9em; background: var(--accent-soft); padding: 0.05em 0.3em; border-radius: var(--radius);
 }
-.feature-list li + li { margin-top: 0.35rem; }
+.feature-list li + li { margin-top: var(--sp-1); }
 .content pre {
   font-family: ui-monospace, SFMono-Regular, Consolas, "BIZ UDGothic", monospace;
-  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-  padding: 0.6rem 0.8rem; font-size: 0.8rem; line-height: 1.5; overflow-x: auto; margin: 0.4rem 0;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--sp-2) var(--sp-3); font-size: var(--fs-s); line-height: 1.5; overflow-x: auto; margin: var(--sp-1) 0;
 }
-.table-wrap { overflow-x: auto; margin: 0.4rem 0; }
-.tbl { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
-.tbl th, .tbl td { border-bottom: 1px solid var(--border); padding: 0.35rem 0.45rem; text-align: left; vertical-align: top; }
+.table-wrap { overflow-x: auto; margin: var(--sp-1) 0; }
+.tbl { border-collapse: collapse; width: 100%; font-size: var(--fs-s); }
+.tbl th, .tbl td { border-bottom: 1px solid var(--border); padding: var(--sp-1) var(--sp-2); text-align: left; vertical-align: top; }
 .tbl thead th { color: var(--muted); }
 
 /* 折りたたみ（使い方ページ・紹介ページ。WRITING.md の基準で、補足・一覧はここに入れる） */
-.content details { margin: 0.4rem 0; }
-.content summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; }
-.content details[open] summary { margin-bottom: 0.3rem; }
-.content h4 { font-size: 0.9rem; margin: 0.8rem 0 0.2rem; }
+.content details { margin: var(--sp-1) 0; }
+.content details[open] summary { margin-bottom: var(--sp-1); }
+.content h4 { margin: var(--sp-3) 0 var(--sp-1); }
 
 /* 日英の切り替え（ヘッダーの下。英語版は /en/。README「ツールを追加するとき」23） */
-.lang-switch { font-size: 0.82rem; margin-top: 0.35rem; }
+.lang-switch { font-size: var(--fs-s); margin-top: var(--sp-1); }
+.lang-switch a { display: inline-flex; align-items: center; min-height: var(--tap); }
 
 /* 英語ページの折りたたみ（WRITING.md 5 章: 補足・一覧は <details> に入れる） */
-.more { margin-top: 0.7rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; }
-.more summary { cursor: pointer; color: var(--accent); font-size: 0.88rem; font-weight: 600; }
-.more[open] summary { margin-bottom: 0.4rem; }
-.more > * + * { margin-top: 0.4rem; }
+.more { margin-top: var(--sp-3); border-top: 1px dashed var(--border); padding-top: var(--sp-2); }
+.more summary { color: var(--accent); }
+.more[open] summary { margin-bottom: var(--sp-2); }
+.more > * + * { margin-top: var(--sp-2); }
