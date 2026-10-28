@@ -86,6 +86,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* ボタン（主は .btn-primary、ほかは .btn。色と線は皮が持つ） */
 .btn, .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); text-decoration: none; text-align: center; }
 
+/* <a> の主ボタン: 皮の .btn-primary は :where() で詳細度 0 のため、a { color: var(--accent) } に負けて字が地と同じ色になる（出どころは皮。皮で直すかは ROADMAP の依頼。それまで repo ごとに web-roulette と同じ形で持つ） */
+:where(html:not([data-skin="base"])) a.btn-primary { color: var(--on-accent); }
+
 /* 読みもの（guide.html） */
 .content h3 { margin: var(--sp-4) 0 var(--sp-1); }
 .content p + p { margin-top: var(--sp-2); }
