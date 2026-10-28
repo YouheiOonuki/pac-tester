@@ -25,9 +25,12 @@ eachBuild('外部のファイルを読み込む要素がない（script src・li
 });
 
 eachBuild('広告・アクセス解析のコードが入っていない', (html) => {
-  for (const s of ['googlesyndication', 'cloudflareinsights', 'adsbygoogle', 'google-adsense-account', 'googletagmanager', 'google-analytics', 'data-cf-beacon']) {
+  for (const s of ['googlesyndication', 'cloudflareinsights', 'google-adsense-account', 'googletagmanager', 'google-analytics', 'data-cf-beacon']) {
     assert.ok(!html.includes(s), s);
   }
+  // adsbygoogle は広告の枠（<ins class="adsbygoogle">）と呼び出し（adsbygoogle.push・window.adsbygoogle）で見る。
+  // 皮の印刷の規則にある「印刷では広告を隠す」の CSS のセレクタ（ins.adsbygoogle）は広告のコードではないので数えない
+  assert.doesNotMatch(html, /<ins\b[^>]*adsbygoogle|adsbygoogle\s*(\.push|\|\||=)|window\.adsbygoogle/);
 });
 
 test('本ツールのコードは fetch・XMLHttpRequest・WebSocket などで通信しない', () => {

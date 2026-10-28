@@ -24,7 +24,7 @@
       <span class="pt-title">{{t:title}}</span>
     </div>
     <div class="pt-toolbar" role="toolbar" aria-label="{{t:toolbarLabel}}">
-      <button type="button" id="pt-run" class="pt-primary" title="{{t:runTitle}}">{{t:run}}</button>
+      <button type="button" id="pt-run" class="btn-primary" title="{{t:runTitle}}">{{t:run}}</button>
       <button type="button" id="pt-diff" aria-pressed="false" title="{{t:diffTitle}}">{{t:diff}}</button>
       <button type="button" id="pt-sample" title="{{t:sampleTitle}}">{{t:sample}}</button>
       <button type="button" id="pt-about" title="{{t:aboutTitle}}">{{t:about}}</button>
@@ -42,7 +42,7 @@
           <div class="pt-pac-head">
             <label for="pt-pac-a" id="pt-pac-a-label">PAC</label>
             <span class="pt-file" id="pt-file-a"></span>
-            <button type="button" class="pt-small" data-open="a">{{t:open}}</button>
+            <button type="button" data-open="a">{{t:open}}</button>
           </div>
           <textarea id="pt-pac-a" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="{{t:pacPlaceholder}}"></textarea>
         </div>
@@ -50,8 +50,8 @@
           <div class="pt-pac-head">
             <label for="pt-pac-b">{{t:newPacLabel}}</label>
             <span class="pt-file" id="pt-file-b"></span>
-            <button type="button" class="pt-small" data-open="b">{{t:open}}</button>
-            <button type="button" class="pt-small" id="pt-copy-ab" title="{{t:copyOldTitle}}">{{t:copyOld}}</button>
+            <button type="button" data-open="b">{{t:open}}</button>
+            <button type="button" id="pt-copy-ab" title="{{t:copyOldTitle}}">{{t:copyOld}}</button>
           </div>
           <textarea id="pt-pac-b" class="pt-code" rows="18" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" placeholder="{{t:newPacPlaceholder}}"></textarea>
         </div>
@@ -80,8 +80,8 @@
         </div>
         <textarea id="pt-urls" class="pt-code" rows="8" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off" aria-labelledby="pt-h-urls"></textarea>
         <div class="pt-row">
-          <button type="button" class="pt-small" id="pt-urls-open">{{t:urlsOpen}}</button>
-          <button type="button" class="pt-small" id="pt-urls-save">{{t:urlsSave}}</button>
+          <button type="button" id="pt-urls-open">{{t:urlsOpen}}</button>
+          <button type="button" id="pt-urls-save">{{t:urlsSave}}</button>
           <input type="file" id="pt-urls-input" accept=".txt,.csv,text/plain" hidden>
         </div>
       </section>
@@ -102,7 +102,7 @@
           <span class="pt-label" id="pt-when-label">{{t:whenLabel}}</span>
           <label class="pt-check"><input type="checkbox" id="pt-use-now">{{t:useNow}}</label>
           <div class="pt-row" role="group" aria-labelledby="pt-when-label">
-            <label for="pt-datetime" class="pt-visually-hidden">{{t:datetimeLabel}}</label>
+            <label for="pt-datetime" class="visually-hidden">{{t:datetimeLabel}}</label>
             <input type="datetime-local" id="pt-datetime" step="1">
             <label for="pt-tz">{{t:tzLabel}}</label>
             <select id="pt-tz"></select>
@@ -112,7 +112,7 @@
           <label class="pt-check"><input type="checkbox" id="pt-strip-https">{{t:stripHttps}}</label>
         </div>
         <p class="pt-hint">{{t:settingsHint}}</p>
-        <p><button type="button" class="pt-small" data-reset-storage="pac-tester_" data-reset-confirm="{{t:resetStorageConfirm}}">{{t:resetStorage}}</button></p>
+        <p><button type="button" data-reset-storage="pac-tester_" data-reset-confirm="{{t:resetStorageConfirm}}">{{t:resetStorage}}</button></p>
       </details>
 
       <section class="pt-card" aria-labelledby="pt-h-results">
@@ -122,11 +122,11 @@
         </div>
         <div class="pt-legend" id="pt-legend" aria-label="{{t:legendLabel}}"></div>
         <div class="pt-row pt-filters">
-          <label for="pt-filter" class="pt-visually-hidden">{{t:filterLabel}}</label>
+          <label for="pt-filter" class="visually-hidden">{{t:filterLabel}}</label>
           <input type="search" id="pt-filter" placeholder="{{t:filterLabel}}">
           <label class="pt-check" id="pt-only-changed-wrap" hidden><input type="checkbox" id="pt-only-changed">{{t:onlyChanged}}</label>
           <label class="pt-check"><input type="checkbox" id="pt-only-problems">{{t:onlyProblems}}</label>
-          <button type="button" class="pt-small" id="pt-csv">{{t:csv}}</button>
+          <button type="button" id="pt-csv">{{t:csv}}</button>
         </div>
         <div class="pt-table-wrap">
           <table class="pt-table" id="pt-table">
@@ -159,7 +159,7 @@
       <p class="pt-hint">{{t:licenseHint}}</p>
       <pre class="pt-license-text" id="pt-license-text" tabindex="0"></pre>
       <div class="pt-dialog-buttons">
-        <button type="submit" value="close" class="pt-primary">{{t:close}}</button>
+        <button type="submit" value="close" class="btn-primary">{{t:close}}</button>
       </div>
     </form>
   </dialog>
