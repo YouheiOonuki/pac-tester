@@ -41,6 +41,40 @@
   }
   </script>
 
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I test a PAC file without deploying it?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Paste it into the tester and list the URLs you care about. You don't need a web server or a proxy." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I debug FindProxyForURL?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Put alert(\"…\") calls in the script: their output appears on the result row for that URL. Script errors and timeouts also show per URL." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does dnsResolve or isInNet behave differently here?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A web page can't do DNS lookups, so the tester uses your host-to-IP table instead. A host that isn't in the table can't be resolved: dnsResolve returns null and isResolvable and isInNet return false." }
+      },
+      {
+        "@type": "Question",
+        "name": "What URL format do I use for a local .pac file?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For this tester, none: open or drop the file. A local file URL looks like file:///C:/proxy/proxy.pac on Windows (RFC 8089, E.2), but Windows' WinHTTP supports only http: and https: PAC URLs." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does a path rule not match https URLs?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Chrome and Edge pass only https://host/ to the PAC for https URLs, without the path or query. The tester does the same by default." }
+      }
+    ]
+  }
+  </script>
+
   <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト） -->
   <meta name="google-adsense-account" content="ca-pub-5375267956079717">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
