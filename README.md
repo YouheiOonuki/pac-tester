@@ -76,7 +76,7 @@ node --test tests/*.test.js
 - `build.mjs` は依存パッケージなし（英語版のコメントを取り除くのに、同梱する acorn を使う）。`src/app.html` に `src/app.css`・`acorn/dist/acorn.js`・文言（`window.PT_MSG`）・`src/core.js`・隔離用の枠（`window.PT_SANDBOX_HTML` という文字列。中に `pac-runtime.js` と `worker.js` を文字列で入れる）・`src/app.js` をそのまま埋め込む
 - 埋め込む JS に `</script` があれば `<\/script` にし、`<script` があればビルドを止める。枠の HTML は JSON 文字列にし、`<` を `<` にして入れる。`src/*.js` にも「`<` のすぐ後ろに script」と書かない
 - 同じ入力なら同じ `pac-tester.html`・`pac-tester-en.html` になる。CI（`.github/workflows/test.yml`）で `npm ci && node build.mjs` のあと差分が無いことを確かめるので、**`src/` やライブラリを直したら、ビルドした 2 つのファイルも一緒にコミットする**
-- サイズ（2026-09-25 のビルド）：`pac-tester.html` 378,977 バイト（約 370KB）、`pac-tester-en.html` 362,110 バイト（約 354KB）。うち acorn.js 245,232 バイト。ライブラリを更新したら紹介ページ（`index.html`・`en/index.html`）の「約 ○KB」と JSON-LD の `fileSize` も直す（`tests/build.test.js` が ±10KB で確かめる）
+- サイズ（2026-11-18 のビルド）：`pac-tester.html` 389,819 バイト（約 381KB）、`pac-tester-en.html` 368,118 バイト（約 359KB）。うち acorn.js 245,232 バイト。ライブラリを更新したら紹介ページ（`index.html`・`en/index.html`）の「約 ○KB」と JSON-LD の `fileSize` も直す（`tests/build.test.js` が ±10KB で確かめる）
 
 ## ライブラリとライセンス
 
