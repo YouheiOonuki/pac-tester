@@ -109,8 +109,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   border-top: 1px solid var(--border);
   margin-top: var(--sp-2);
 }
-.footer-nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 0 var(--sp-4); margin-bottom: var(--sp-2); }
-.footer-nav a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--muted); text-decoration: none; }
+.footer-nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin-bottom: var(--sp-2); }
+.footer-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); min-width: var(--tap); color: var(--muted); text-decoration: none; }
 .footer-nav a:hover, .footer-nav a[aria-current="page"] { color: var(--accent); }
 
 /* ===== PAC ファイル テスター固有（紹介ページ・使い方ページ） ===== */
@@ -137,7 +137,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 /* 日英の切り替え（ヘッダーの下。英語版は /en/。README「ツールを追加するとき」23） */
 .lang-switch { font-size: var(--fs-s); margin-top: var(--sp-1); }
-.lang-switch a { display: inline-flex; align-items: center; min-height: var(--tap); }
+.lang-switch a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); min-width: var(--tap); }
 
 /* 英語ページの折りたたみ（WRITING.md 5 章: 補足・一覧は <details> に入れる） */
 .more { margin-top: var(--sp-3); border-top: 1px dashed var(--border); padding-top: var(--sp-2); }

@@ -124,7 +124,7 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
   font-weight: 700; font-size: var(--fs-s);
 }
 .pt-title { font-weight: 700; white-space: nowrap; }
-.pt-toolbar { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.pt-toolbar { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .pt-toolbar button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
 
 /* 本体: 左に PAC とチェック、右に URL・設定・結果 */
@@ -189,7 +189,7 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 .pt-field input[type="text"] { width: 12rem; font-family: ui-monospace, Consolas, monospace; }
 
 /* 結果 */
-.pt-legend { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-bottom: var(--sp-1); }
+.pt-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-1); }
 .pt-legend button {
   border: 1px solid transparent; border-radius: 999px; padding: 0 var(--sp-3); font-weight: 400;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, Consolas, monospace;
