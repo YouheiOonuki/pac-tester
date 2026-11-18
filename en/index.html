@@ -154,30 +154,28 @@
       </details>
     </section>
 
-    <section class="card content" aria-labelledby="h-qa">
-      <h2 id="h-qa">Common questions this answers</h2>
-      <h3>How do I test a PAC file without deploying it?</h3>
-      <p>Paste it into the tester and list the URLs you care about. You don't need a web server or a proxy.</p>
+    <section class="card content">
       <details class="more">
-        <summary>How the URL is passed</summary>
+        <summary>Common questions this answers</summary>
+        <h3>How do I test a PAC file without deploying it?</h3>
+        <p>Paste it into the tester and list the URLs you care about. You don't need a web server or a proxy.</p>
+        <h3>How the URL is passed</h3>
         <p>The tester calls <code>FindProxyForURL(url, host)</code> for each one: <code>host</code> is the host name from the URL, in lower case and without the port. A line without a scheme is treated as <code>http://</code>.</p>
-      </details>
 
-      <h3>How do I debug FindProxyForURL?</h3>
-      <p>Put <code>alert("…")</code> calls in the script: their output appears on the result row for that URL. Script errors and timeouts also show per URL.</p>
+        <h3>How do I debug FindProxyForURL?</h3>
+        <p>Put <code>alert("…")</code> calls in the script: their output appears on the result row for that URL. Script errors and timeouts also show per URL.</p>
 
-      <h3>Why does dnsResolve or isInNet behave differently here?</h3>
-      <p>A web page can't do DNS lookups, so the tester uses your host-to-IP table instead. A host that isn't in the table can't be resolved: <code>dnsResolve</code> returns <code>null</code> and <code>isResolvable</code> and <code>isInNet</code> return <code>false</code>.</p>
-      <details class="more">
-        <summary>IP addresses, localhost and IPv6</summary>
+        <h3>Why does dnsResolve or isInNet behave differently here?</h3>
+        <p>A web page can't do DNS lookups, so the tester uses your host-to-IP table instead. A host that isn't in the table can't be resolved: <code>dnsResolve</code> returns <code>null</code> and <code>isResolvable</code> and <code>isInNet</code> return <code>false</code>.</p>
+        <h3>IP addresses, localhost and IPv6</h3>
         <p>An IP address in the URL is used as is, and <code>localhost</code> is 127.0.0.1 unless the table says otherwise. Only IPv4 is supported, and Microsoft's IPv6 extensions (<code>isInNetEx</code>, <code>dnsResolveEx</code> and so on) raise an error.</p>
+
+        <h3>What URL format do I use for a local .pac file?</h3>
+        <p>For this tester, none: open or drop the file. A local file URL looks like <code>file:///C:/proxy/proxy.pac</code> on Windows (<a href="https://www.rfc-editor.org/rfc/rfc8089.html#appendix-E.2" target="_blank" rel="noopener">RFC 8089, E.2</a>), but Windows' WinHTTP <a href="https://learn.microsoft.com/windows/win32/winhttp/winhttp-autoproxy-support" target="_blank" rel="noopener">supports only http: and https: PAC URLs</a>.</p>
+
+        <h3>Why does a path rule not match https URLs?</h3>
+        <p>Chrome and Edge pass only <code>https://host/</code> to the PAC for https URLs, without the path or query. The tester does the same by default.</p>
       </details>
-
-      <h3>What URL format do I use for a local .pac file?</h3>
-      <p>For this tester, none: open or drop the file. A local file URL looks like <code>file:///C:/proxy/proxy.pac</code> on Windows (<a href="https://www.rfc-editor.org/rfc/rfc8089.html#appendix-E.2" target="_blank" rel="noopener">RFC 8089, E.2</a>), but Windows' WinHTTP <a href="https://learn.microsoft.com/windows/win32/winhttp/winhttp-autoproxy-support" target="_blank" rel="noopener">supports only http: and https: PAC URLs</a>.</p>
-
-      <h3>Why does a path rule not match https URLs?</h3>
-      <p>Chrome and Edge pass only <code>https://host/</code> to the PAC for https URLs, without the path or query. The tester does the same by default.</p>
     </section>
 
     <section class="card content" aria-labelledby="h-safe">
