@@ -159,7 +159,7 @@
         <summary>Common questions this answers</summary>
         <h3>How do I test a PAC file without deploying it?</h3>
         <p>Paste it into the tester and list the URLs you care about. You don't need a web server or a proxy.</p>
-        <h3>How the URL is passed</h3>
+        <h4>How the URL is passed</h4>
         <p>The tester calls <code>FindProxyForURL(url, host)</code> for each one: <code>host</code> is the host name from the URL, in lower case and without the port. A line without a scheme is treated as <code>http://</code>.</p>
 
         <h3>How do I debug FindProxyForURL?</h3>
@@ -167,7 +167,7 @@
 
         <h3>Why does dnsResolve or isInNet behave differently here?</h3>
         <p>A web page can't do DNS lookups, so the tester uses your host-to-IP table instead. A host that isn't in the table can't be resolved: <code>dnsResolve</code> returns <code>null</code> and <code>isResolvable</code> and <code>isInNet</code> return <code>false</code>.</p>
-        <h3>IP addresses, localhost and IPv6</h3>
+        <h4>IP addresses, localhost and IPv6</h4>
         <p>An IP address in the URL is used as is, and <code>localhost</code> is 127.0.0.1 unless the table says otherwise. Only IPv4 is supported, and Microsoft's IPv6 extensions (<code>isInNetEx</code>, <code>dnsResolveEx</code> and so on) raise an error.</p>
 
         <h3>What URL format do I use for a local .pac file?</h3>
