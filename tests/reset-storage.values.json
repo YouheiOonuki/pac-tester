@@ -1,0 +1,16 @@
+{
+  "src": "src/reset-storage.js",
+  "prefixes": [
+    "pac-tester_"
+  ],
+  "legacy": [],
+  "pagePrefixes": {},
+  "pageLegacy": {},
+  "inline": [
+    "pac-tester.html",
+    "pac-tester-en.html"
+  ],
+  "skipDirs": [
+    "src"
+  ]
+}

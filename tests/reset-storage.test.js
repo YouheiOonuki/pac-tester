@@ -1,21 +1,39 @@
 // 「保存した内容をすべて消す（初期状態に戻す）」ボタン（reset-storage.js。yorozu-plans ROADMAP K123）のテスト
+// 正本は youheioonuki.github.io の tools/common/reset-storage.test.js。このファイルは repo の値を持たない（yorozu-plans D683・Q-882）。
+// repo の値は、同じフォルダの reset-storage.values.json だけが持つ。ページのボタンの値は、その値と 1 字まで突き合わせる（ページの値が誤っていたら落ちる）
+//   src          … reset-storage.js の場所（repo の最上位から）。require と、埋め込みの元の両方に使う
+//   prefixes     … このツールのキーの接頭辞（ボタンの data-reset-storage）。書いていないページはこの値
+//   legacy       … 接頭辞の無い旧キー（ボタンの data-reset-legacy）。書いていないページはこの値
+//   pagePrefixes … 画面ごとに消す範囲を分けるページ: { "ページ": [接頭辞] }。どれも prefixes のどれかで始まる
+//   pageLegacy   … ページごとの旧キー: { "ページ": [旧キー] }。[] は「このページは旧キーを消さない」
+//   inline       … reset-storage.js を <script src> ではなく、ページの中に埋め込んでいるページ（1 ファイルにビルドするもの）
+//   skipDirs     … ページを探さないフォルダ（node_modules・tests・test・.git・.github・tools のほかに）
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const R = require('../src/reset-storage.js');
 
-// このツールのキーの接頭辞と、接頭辞の無い旧キー（ボタンの data-reset-storage / data-reset-legacy と同じもの）
-const PREFIXES = ["pac-tester_"];
-const LEGACY = [];
-// 画面ごとに消す範囲を分けるページ（1 つのリポジトリに別々の道具があるとき）。書いていないページは PREFIXES
-const PAGE_PREFIXES = {};
-const PAGE_LEGACY = {};
-// reset-storage.js を <script src> ではなく、ページの中に埋め込んでいるページ（1 ファイルにビルドするもの）
-const INLINE = ["pac-tester.html", "pac-tester-en.html"];
-const INLINE_SRC = "src/reset-storage.js";
-const ROOT = path.join(__dirname, "..");
-const SKIP_DIRS = new Set(['node_modules', 'tests', 'test', '.git', '.github', 'tools', "src"]);
+const ROOT = path.join(__dirname, '..');
+const V = JSON.parse(fs.readFileSync(path.join(__dirname, 'reset-storage.values.json'), 'utf8'));
+const KEYS = ['src', 'prefixes', 'legacy', 'pagePrefixes', 'pageLegacy', 'inline', 'skipDirs'];
+const R = require(path.join(ROOT, V.src));
+const SKIP_DIRS = new Set(['node_modules', 'tests', 'test', '.git', '.github', 'tools', ...V.skipDirs]);
+const INLINE_MARK = 'root.ResetStorage = api;';
+
+test('値のファイルは決まった 7 つの名前だけを、決まった形で持つ', () => {
+  assert.deepEqual(Object.keys(V).sort(), [...KEYS].sort(), 'reset-storage.values.json の名前');
+  assert.equal(typeof V.src, 'string');
+  for (const k of ['prefixes', 'legacy', 'inline', 'skipDirs']) assert.ok(Array.isArray(V[k]) && V[k].every((x) => typeof x === 'string' && x), k);
+  assert.ok(V.prefixes.length > 0, 'prefixes が空');
+  for (const k of ['pagePrefixes', 'pageLegacy']) {
+    assert.ok(V[k] && typeof V[k] === 'object' && !Array.isArray(V[k]), k);
+    for (const [page, list] of Object.entries(V[k])) assert.ok(Array.isArray(list) && list.every((x) => typeof x === 'string' && x), k + ' の ' + page);
+  }
+  for (const [page, list] of Object.entries(V.pagePrefixes)) {
+    assert.ok(list.length > 0, 'pagePrefixes の ' + page + ' が空');
+    for (const p of list) assert.ok(V.prefixes.some((q) => p.startsWith(q)), 'pagePrefixes の ' + page + ' の ' + p + ' はこのツールの接頭辞で始まらない');
+  }
+});
 
 function fakeStorage(init) {
   const m = new Map(Object.entries(init));
@@ -31,12 +49,12 @@ function fakeStorage(init) {
 
 test('消すのはこのツールの接頭辞のキー（と旧キー）だけで、ほかのツールのキーは残す', () => {
   const init = { 'zz-other-tool_x': '1', 'zzother_theme': 'dark', 'unrelated': 'u' };
-  for (const p of PREFIXES) { init[p + 'a'] = '1'; init[p + 'b'] = '2'; }
-  for (const k of LEGACY) init[k] = 'old';
-  const expectedLeft = Object.keys(init).filter((k) => !PREFIXES.some((p) => k.startsWith(p)) && !LEGACY.includes(k)).sort();
+  for (const p of V.prefixes) { init[p + 'a'] = '1'; init[p + 'b'] = '2'; }
+  for (const k of V.legacy) init[k] = 'old';
+  const expectedLeft = Object.keys(init).filter((k) => !V.prefixes.some((p) => k.startsWith(p)) && !V.legacy.includes(k)).sort();
   const s = fakeStorage(init);
-  const gone = R.clear(s, PREFIXES, LEGACY);
-  assert.equal(gone.length, PREFIXES.length * 2 + LEGACY.length);
+  const gone = R.clear(s, V.prefixes, V.legacy);
+  assert.equal(gone.length, V.prefixes.length * 2 + V.legacy.length);
   assert.deepEqual(s.keys(), expectedLeft);
   assert.ok(expectedLeft.length > 0);
 });
@@ -69,28 +87,34 @@ function usesStorage(file, html) {
   return /\blocalStorage\b|\bindexedDB\b/.test(code);
 }
 
-test('localStorage を使うページには、消すボタンと reset-storage.js がある', () => {
-  const pages = htmlFiles(ROOT).filter((f) => usesStorage(f, fs.readFileSync(f, 'utf8')));
-  assert.ok(pages.length > 0, 'localStorage を使うページが見つからない');
-  for (const f of pages) {
+const PAGES = htmlFiles(ROOT).filter((f) => usesStorage(f, fs.readFileSync(f, 'utf8')));
+const relOf = (f) => path.relative(ROOT, f).split(path.sep).join('/');
+
+test('localStorage を使うページには、消すボタンと reset-storage.js があり、ボタンの値が値のファイルと同じ', () => {
+  assert.ok(PAGES.length > 0, 'localStorage を使うページが見つからない');
+  for (const f of PAGES) {
     const html = fs.readFileSync(f, 'utf8');
-    const rel = path.relative(ROOT, f);
+    const rel = relOf(f);
     const btn = /<button\b[^>]*\bdata-reset-storage="([^"]*)"[^>]*>([\s\S]*?)<\/button>/.exec(html);
     assert.ok(btn, rel + ' に data-reset-storage のボタンが無い');
-    const want = PAGE_PREFIXES[rel.split(path.sep).join('/')] || PREFIXES;
-    assert.deepEqual(R.splitList(btn[1]), want, rel + ' の接頭辞');
-    for (const p of want) assert.ok(PREFIXES.some((q) => p.startsWith(q)), rel + ' の ' + p + ' はこのツールの接頭辞で始まらない');
+    assert.deepEqual(R.splitList(btn[1]), V.pagePrefixes[rel] || V.prefixes, rel + ' の接頭辞');
     const legacy = /\bdata-reset-legacy="([^"]*)"/.exec(btn[0]);
-    assert.deepEqual(legacy ? R.splitList(legacy[1]) : [], PAGE_LEGACY[rel.split(path.sep).join('/')] || LEGACY, rel + ' の旧キー');
+    assert.deepEqual(legacy ? R.splitList(legacy[1]) : [], V.pageLegacy[rel] || V.legacy, rel + ' の旧キー');
     const label = btn[2].replace(/<[^>]+>/g, '').trim();
     assert.ok(label === '保存した内容をすべて消す（初期状態に戻す）' || label === 'Delete everything saved (reset)', rel + ' の文言: ' + label);
-    if (INLINE.includes(rel.split(path.sep).join('/'))) {
-      assert.ok(fs.readFileSync(path.join(ROOT, INLINE_SRC), 'utf8').includes('root.ResetStorage = api;'));
-      assert.ok(html.includes('root.ResetStorage = api;'), rel + ' に ' + INLINE_SRC + ' が埋め込まれていない');
+    if (V.inline.includes(rel)) {
+      assert.ok(fs.readFileSync(path.join(ROOT, V.src), 'utf8').includes(INLINE_MARK));
+      assert.ok(html.includes(INLINE_MARK), rel + ' に ' + V.src + ' が埋め込まれていない');
       continue;
     }
     const src = /<script\b[^>]*\bsrc="([^"]*reset-storage\.js)"/.exec(html);
     assert.ok(src, rel + ' に reset-storage.js が無い');
     assert.ok(fs.existsSync(path.join(path.dirname(f), src[1].split(/[?#]/)[0])), rel + ' の reset-storage.js のパス');
   }
+});
+
+test('値のファイルが名指すページは、どれも localStorage を使うページ（古い値を残さない）', () => {
+  const rels = new Set(PAGES.map(relOf));
+  for (const k of ['pagePrefixes', 'pageLegacy']) for (const page of Object.keys(V[k])) assert.ok(rels.has(page), k + ' の ' + page + ' は、localStorage を使うページに無い');
+  for (const page of V.inline) assert.ok(rels.has(page), 'inline の ' + page + ' は、localStorage を使うページに無い');
 });
