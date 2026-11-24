@@ -1,3 +1,5 @@
 # 改行は LF に固定する（PC の core.autocrlf が true でも、作業ツリーを CRLF にしない）。
 # 生成物とテストの突き合わせが CRLF で外れるため（2026-10-10、yorozu-plans BUILDLOG）
 * text=auto eol=lf
+# src/ は build.mjs が 1 枚の html に埋め込む元で、ページから読まれない。配信（tools/deploy の git archive）に載せない（2026-11-25、組み立て前の雛形 src/app.html が公開に出ていた）
+src/ export-ignore
