@@ -3,3 +3,4 @@
 * text=auto eol=lf
 # src/ は build.mjs が 1 枚の html に埋め込む元で、ページから読まれない。配信（tools/deploy の git archive）に載せない（2026-11-25、組み立て前の雛形 src/app.html が公開に出ていた）
 src/ export-ignore
+build.mjs export-ignore
